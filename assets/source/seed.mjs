@@ -3,7 +3,6 @@
 //
 // Every pixel here is typed, not drawn. A pixel stores a material ramp and a level; a light map shifts
 // the level and a narrow ordered dither picks the palette colour. The result is split into layers and
-// 12 frames and written as a real Aseprite file, so each part can be redrawn by hand afterwards.
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { blit, png, writeAse } from './ase.mjs';
 
@@ -19,7 +18,6 @@ const C = {
   g1: '#7C7A70', g2: '#A6A08D', g3: '#CDC5AD', paper: '#F4EEDF', ink: '#292D32',
 };
 
-// Dark -> light. A '#hex' material is emissive: it ignores light.
 const RAMP = {
   wall: [C.n0, C.n1, C.night, C.n3, C.n4, C.shadow, C.blue, C.bL],
   wallWarm: [C.n0, C.n1, C.night, C.n3, C.m1, C.m2, C.w3, C.amber],
@@ -44,7 +42,6 @@ const TAGS = ['', 'work', 'notes', 'about', 'contact', 'radio', 'cat'];
 // label sits right under the object; the page widens small targets to a tappable size by itself.
 const PAD = { work: [0, 0, 0, 0], notes: [1, 1, 1, 1], about: [1, 1, 1, 1], contact: [1, 1, 1, 1], radio: [1, 1, 1, 1], cat: [1, 1, 1, 1] };
 
-// ---------- engine ----------
 let mat, lvl, tag, cur = 0, lit = true;
 const reset = () => { mat = new Array(W * H).fill('wall'); lvl = new Float32Array(W * H); tag = new Uint8Array(W * H); };
 const rnd = seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
@@ -93,8 +90,6 @@ function colourAt(i, boost = 0) {
   return ramp[Math.max(0, Math.min(ramp.length - 1, base + (t > b ? 1 : 0)))];
 }
 
-// ---------- sprites ----------
-// The sleeper's face, typed upright and turned on its side when drawn (the head points left on the pillow).
 const FACE = [
   '.....hhhhh.....',
   '...hhhhhhhhh...',
@@ -116,7 +111,6 @@ const FACE = [
 ];
 const FACE_KEY = { h: ['wall', 0], H: ['wall', 2], s: ['wood', 5.6], d: ['wood', 4.6], n: ['wood', 4.6], m: ['wood', 3.6], e: [C.w0] };
 const turned = rows => [...rows[0]].map((_, c) => rows.map(r => r[c]).join(''));
-// An orange tabby sitting up, facing the room: cream bib and muzzle, green eyes, tail wrapped round its feet.
 // Fixed colours, shaded by hand, so the room's light map cannot dither the face away.
 const CAT = [
   '....oo...........oo.....',
@@ -146,9 +140,7 @@ const CAT = [
   '.obbsbbsbbsbbsbbsbbbbo..',
   '..oooooooooooooooooooo..',
 ];
-// The tip of the tail lifts.
 const CAT_FLICK = [...CAT.slice(0, 21), 'ooobsbbblllolllbbbsbo...', 'olobbbbbwwwowwwbbbbbo...', 'obllsllsllsllsllsbbbbo..', ...CAT.slice(24)];
-// Being petted: eyes squeezed shut.
 const CAT_HAPPY = [...CAT.slice(0, 7), '...obbbobbbbbbbobbbo....', '...oblobolwwwlobolbo....', ...CAT.slice(9)];
 const HEART = ['.#.#.', '#####', '#####', '.###.', '..#..'];
 const CAT_KEY = {
@@ -168,7 +160,6 @@ function floppy(x, y, m, l) {
   rect(x + 4, y + 11, 9, 7, 'pale', 4); rect(x + 9, y + 12, 2, 5, m, l - 2);
 }
 
-// Guts, from Kentaro Miura's Berserk: half figure, the Dragonslayer slung across his back.
 // Fixed colours: the room's light map would dither a picture this small into mud.
 function guts(x, y) {
   const key = {
@@ -178,17 +169,15 @@ function guts(x, y) {
   };
   rect(x, y, 42, 32, C.m2);
 
-  // the sword: grip and guard above his right shoulder, the slab of a blade running down behind him
   const steel = [C.g3, C.g2, C.g2, C.g1, C.g1, C.g1, C.shadow, C.shadow];
   for (let i = 11; i < 42; i++) {
     const top = Math.round(10 + 0.67 * (i - 10)) - 4;
     steel.forEach((c, j) => { if (top + j < 32) put(x + i, y + top + j, c); });
   }
-  for (let t = 0; t <= 10; t++) rect(x + Math.round(9.2 - 0.58 * t), y + Math.round(9.9 - 0.38 * t), 2, 2, t % 3 ? C.w0 : C.w2); // grip
-  rect(x + 2, y + 4, 3, 3, C.shadow); // pommel
-  for (let t = 0; t <= 10; t++) rect(x + Math.round(7.5 + 0.5 * t), y + Math.round(14.2 - 0.74 * t), 2, 2, t < 2 || t > 8 ? C.shadow : C.n4); // guard
+  for (let t = 0; t <= 10; t++) rect(x + Math.round(9.2 - 0.58 * t), y + Math.round(9.9 - 0.38 * t), 2, 2, t % 3 ? C.w0 : C.w2);
+  rect(x + 2, y + 4, 3, 3, C.shadow);
+  for (let t = 0; t <= 10; t++) rect(x + Math.round(7.5 + 0.5 * t), y + Math.round(14.2 - 0.74 * t), 2, 2, t < 2 || t > 8 ? C.shadow : C.n4);
 
-  // body: the left half is typed and mirrored; the right side loses the cape and gets the iron arm
   const left = [
     '.........KK.....',
     '.........KKK....',
@@ -217,7 +206,6 @@ function guts(x, y) {
     return l + r;
   }), key);
 
-  // head: spiked hair with the white forelock, right eye shut, scar across the nose
   spr(x + 15, y + 3, [
     '...K..K..K...',
     '..KK.KKK.KK..',
@@ -234,7 +222,6 @@ function guts(x, y) {
   ], key);
 }
 
-// ---------- scene ----------
 const SCREEN = { x: 238, y: 36, w: 64, h: 40 };
 const GLASS = { x: 41, y: 25, w: 94, h: 72 };
 const STEAM = { x: 199, y: 82, w: 12, h: 15 };
@@ -260,7 +247,6 @@ function floor() {
   }
 }
 
-// Draws one frame. `done(name)` is called after each group; the seed turns each group into a layer.
 function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } = {}, done = () => {}) {
   reset();
   const layer = (name, draw) => { draw(); done(name); };
@@ -271,7 +257,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     floor();
   });
 
-  // sky and skyline react to the window light, which reads as city glow
   layer('window', () => {
     const G = GLASS;
     rect(36, 20, 104, 82, 'pale', 3);
@@ -290,10 +275,8 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     rect(86, G.y, 5, G.h, 'pale', 3); rect(86, G.y, 1, G.h, 'pale', 4);
     shade(34, 107, 108, 3, -1);
     rect(32, 102, 112, 5, 'pale', 4); rect(32, 106, 112, 1, 'pale', 2);
-    // sill plant
     ell(109, 88, 7, 6, 'sage', 2); ell(105, 85, 4, 4, 'sage', 3); ell(114, 84, 4, 5, 'sage', 3); ell(109, 81, 2, 3, 'sage', 4);
     rect(104, 95, 10, 7, 'wood', 3); rect(103, 94, 12, 2, 'wood', 4);
-    // curtains and rod
     const fold = [2, 3, 3, 2, 1, 2, 3, 2, 2, 1];
     for (const [cx, cw] of [[17, 22], [139, 20]])
       for (let k = 0; k < cw; k++) rect(cx + k, 15, 1, 94 + (k * 7) % 3, 'sage', fold[k % fold.length]);
@@ -316,7 +299,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     rect(430, 15, 1, 6, C.ink); rect(430, 20, 4, 1, C.ink);
   });
 
-  // The headboard closes the bed inside the canvas, so the wall can carry on to its left.
   layer('bed', () => {
     rect(6, 216, 134, 12, 'floor', 0);
     rect(0, 104, 6, 124, 'wood', 2); rect(0, 104, 6, 1, 'wood', 4); rect(5, 105, 1, 123, 'wood', 1);
@@ -325,16 +307,14 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     rect(6, 208, 140, 9, 'wood', 2); rect(6, 208, 140, 1, 'wood', 3); rect(140, 217, 6, 11, 'wood', 1);
     shade(6, 228, 140, 3, -1);
     shade(11, 169, 34, 1, -1);
-    rect(11, 137, 34, 32, 'pale', 5); rect(10, 138, 36, 30, 'pale', 5); rect(11, 168, 34, 1, 'pale', 4); // pillow
-    rect(48, 120, 98, 66, 'sage', 3); // blanket
+    rect(11, 137, 34, 32, 'pale', 5); rect(10, 138, 36, 30, 'pale', 5); rect(11, 168, 34, 1, 'pale', 4);
+    rect(48, 120, 98, 66, 'sage', 3);
     rect(48, 120, 8, 66, 'pale', 5); rect(55, 120, 1, 66, 'pale', 3); // the sheet folded back over it
     for (let x = 48; x < 146; x++) rect(x, 186, 1, 18 + Math.round(2 * Math.sin(x / 6)), 'sage', 2);
     rect(48, 186, 98, 1, 'sage', 4);
   });
 
-  // Asleep on their back, one arm out over the blanket.
   layer('person', () => {
-    // the body under the blanket: wide at the shoulders, narrowing to the feet, lit along the far edge
     const half = x => x < 64 ? 12 : x < 98 ? 12 - (x - 64) / 34 * 3 : x < 130 ? 9 - (x - 98) / 32 * 2 : 7 - (x - 130) * 0.9;
     for (let x = 56; x < 137; x++) {
       const h = Math.round(half(x)), top = 153 - h, low = 153 + h;
@@ -344,21 +324,18 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     }
     rect(100, 153, 26, 1, 'sage', 2.5); // the dip between the legs
     for (const y of [148, 158]) { ell(132, y, 4.5, 4, 'sage', 3.5); rect(128, y + 4, 9, 2, 'sage', 2); } // feet
-    for (const [x, y, n] of [[70, 146, 9], [84, 160, 7], [112, 148, 8]]) for (let k = 0; k < n; k++) put(x + k, y + Math.floor(k / 3), 'sage', 2.5); // creases
+    for (const [x, y, n] of [[70, 146, 9], [84, 160, 7], [112, 148, 8]]) for (let k = 0; k < n; k++) put(x + k, y + Math.floor(k / 3), 'sage', 2.5);
 
-    // shoulders in a T-shirt, neck, head
     rect(42, 142, 6, 22, 'blue', 4); rect(41, 144, 1, 18, 'blue', 4); rect(42, 163, 6, 1, 'blue', 3);
     rect(39, 150, 3, 7, 'wood', 4.6);
     shade(25, 161, 14, 1, -1);
     spr(24, 146, turned(FACE), FACE_KEY);
 
-    // the near arm lies on top of the blanket
     rect(48, 168, 34, 1, 'sage', 2);
     rect(46, 162, 12, 6, 'blue', 4); rect(46, 167, 12, 1, 'blue', 3);
     rect(58, 163, 18, 4, 'wood', 5.6); rect(58, 166, 18, 1, 'wood', 4.6);
     rect(76, 162, 6, 5, 'wood', 5.6); rect(76, 166, 6, 1, 'wood', 4.6); put(81, 162, 'sage', 3);
 
-    // z z z, one more every three frames
     [[42, 139], [47, 131], [53, 121]].slice(0, zzz).forEach(([x, y], k) => spr(x, y, Z[k], { '#': [C.n4] }));
   });
 
@@ -384,13 +361,11 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
         x += w;
       }
     }
-    // plant with a trailing vine, radio
     rect(404, 50, 12, 10, 'wood', 4); rect(403, 49, 14, 2, 'wood', 5);
     ell(410, 43, 9, 7, 'sage', 2); ell(405, 40, 5, 5, 'sage', 3); ell(415, 39, 5, 5, 'sage', 3); ell(410, 36, 3, 3, 'sage', 4);
     for (let k = 0; k < 9; k++) { const y = 52 + k * 6, x = 396 + (k % 2); rect(x, y, 1, 6, 'sage', 2); rect(x + (k % 2 ? 1 : -2), y + 2, 2, 2, 'sage', 3); }
   });
 
-  // The radio is the sound switch. Notes drift up from it; the page hides them when sound is off.
   layer('radio', () => {
     tagged('radio', () => {
       rect(432, 46, 24, 7, 'pale', 3); rect(432, 53, 24, 11, 'pale', 2); rect(432, 53, 24, 1, 'pale', 4);
@@ -400,7 +375,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     [[], [[461, 39]], [[462, 33], [468, 40]], [[464, 26], [470, 34]]][zzz].forEach(([x, y]) => spr(x, y, NOTE, { '#': [C.w5] }));
   });
 
-  // 78 tall, 44 deep, against the wall
   layer('desk', () => {
     const DX = 158, DW = 214;
     shade(DX, 206, DW, 5, -1);
@@ -408,7 +382,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     for (const [x, y, w] of [[164, 91, 40], [330, 95, 36], [170, 119, 30], [312, 121, 50]]) rect(x, y, w, 1, 'wood', 2.5);
     rect(DX, 128, DW, 3, 'wood', 4);
     rect(DX, 131, DW, 75, 'wood', 2);
-    // knee hole: dim wall and floor, a cardboard box, two cables
     rect(166, 131, 131, F - 131, 'wall', 0); rect(166, F - 6, 131, 1, 'wall', 1); rect(166, F, 131, 206 - F, 'floor', 1);
     for (let y = F + 12; y < 206; y += 12) rect(166, y, 131, 1, 'floor', 0);
     rect(264, 158, 28, 10, 'wood', 2); rect(264, 168, 28, 26, 'wood', 1); rect(277, 158, 2, 10, 'wood', 1); shade(264, 194, 28, 2, -1);
@@ -444,9 +417,8 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     rect(240, 81, 10, 2, 'pale', 5);
     for (let k = 0; k < 4; k++) rect(282 + k * 4, 81, 2, 2, 'pale', 1);
     rect(300, 81, 2, 2, C.sL);
-    rect(229, 62, 6, 7, 'wood', 5); rect(229, 62, 6, 1, 'wood', 4); // sticky note on the bezel
+    rect(229, 62, 6, 7, 'wood', 5); rect(229, 62, 6, 1, 'wood', 4);
 
-    // screen: a tiny file window
     const S = SCREEN;
     rect(S.x, S.y, S.w, S.h, C.paper);
     for (const [x, y] of [[0, 0], [S.w - 1, 0], [0, S.h - 1], [S.w - 1, S.h - 1]]) put(S.x + x, S.y + y, 'pale', 1);
@@ -462,7 +434,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     });
     if (!caret) rect(CARET.x, CARET.y, 1, 6, C.ink);
 
-    // keyboard and mouse
     rect(224, 110, 78, 12, 'pale', 4); rect(224, 122, 78, 2, 'pale', 2);
     rect(226, 112, 74, 8, 'pale', 3);
     for (const ky of [112, 115, 118]) for (let kx = 227; kx < 299; kx += 3) rect(kx, ky, 2, 2, 'pale', 5);
@@ -490,7 +461,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     for (let k = 0; k < 5; k++) put(330 - (k % 2), 118 + k * 2, 'sage', 1);
   }));
 
-  // turned to face the room
   layer('chair', () => {
     for (let x = 200; x < 257; x++) for (let y = 216; y < 228; y++) if (((x - 228) / 28) ** 2 + ((y - 222) / 6) ** 2 <= 1) shade(x, y, 1, 1, -1);
     rect(207, 216, 43, 3, 'metal', 2); rect(205, 218, 5, 4, 'metal', 1); rect(246, 218, 5, 4, 'metal', 1); rect(226, 219, 5, 5, 'metal', 1);
@@ -500,7 +470,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
     rect(203, 192, 51, 4, 'blue', 2);
   });
 
-  // Idle, the tail tip flicks. Purring (purr = frame number), the head trembles and hearts drift up.
   layer('cat', () => tagged('cat', () => {
     const { x, y } = CAT_AT;
     shade(x + 1, y + 26, 21, 2, -1);
@@ -514,7 +483,6 @@ function scene({ rain = 0, caret = 0, steam = 0, zzz = 0, cat = 0, purr = -1 } =
   }));
 }
 
-// ---------- write the Aseprite file ----------
 const OUT = 'assets/source/room.aseprite';
 if (existsSync(OUT) && !process.argv.includes('--force')) {
   console.error(`${OUT} already exists. Seeding would overwrite anything drawn by hand.\nRun "bun run art:seed -- --force" if that is really what you want.`);
@@ -527,7 +495,6 @@ function render(pick = i => colourAt(i)) {
   for (let i = 0; i < W * H; i++) { const c = pick(i); if (c) { out.set(rgb[c], i * 4); out[i * 4 + 3] = 255; } }
   return out;
 }
-// Trim an RGBA canvas to its drawn pixels. Returns undefined if there are none.
 function cel(layer, rgba) {
   let x0 = W, y0 = H, x1 = -1, y1 = -1;
   for (let i = 0; i < W * H; i++) if (rgba[i * 4 + 3]) { x0 = Math.min(x0, i % W); x1 = Math.max(x1, i % W); y0 = Math.min(y0, (i / W) | 0); y1 = Math.max(y1, (i / W) | 0); }
@@ -538,14 +505,12 @@ function cel(layer, rgba) {
 }
 const same = (a, b) => a && b && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h && a.rgba.equals(b.rgba);
 
-// 12 frames at 100ms: rain loops twice, steam and the sleeper's z's change every 3, the caret is on for 6 and off for 6.
 const FRAMES = 12, layers = [], frames = [], purring = [];
 let hover, slices;
 for (let f = 0; f < FRAMES; f++) {
   const cels = [];
   let prev, n = 0;
   scene({ rain: f % 6, steam: Math.floor(f / 3) % 4, zzz: Math.floor(f / 3) % 4, caret: f < 6 ? 0 : 1, cat: f < 8 ? 0 : 1 }, name => {
-    // A layer is whatever its group changed on the canvas, shadows it cast included.
     const now = render(), diff = Buffer.alloc(now.length);
     for (let i = 0; i < now.length; i += 4) if (!prev || now.readUInt32LE(i) !== prev.readUInt32LE(i)) now.copy(diff, i, i, i + 4);
     prev = now;
@@ -554,7 +519,6 @@ for (let f = 0; f < FRAMES; f++) {
     if (c) cels.push(same(c, frames[0]?.cels.find(o => o.layer === c.layer)) ? { layer: c.layer, link: 0 } : c);
   });
   if (!f) {
-    // Hover layer: tagged objects one step brighter inside a 1px paper outline.
     const near = i => [i - 1, i + 1, i - W, i + W].some(k => k >= 0 && k < W * H && tag[k]);
     hover = cel(0, render(i => tag[i] ? (mat[i][0] === '#' ? null : colourAt(i, 1)) : near(i) ? C.paper : null));
     slices = { 'loop/rain': GLASS, 'loop/steam': STEAM, 'loop/caret': CARET, 'loop/zzz': ZZZ, 'loop/notes': NOTES, 'loop/tail': { x: CAT_AT.x, y: CAT_AT.y + 20, w: 24, h: 6 }, 'crop/print': PRINT };
@@ -566,7 +530,6 @@ for (let f = 0; f < FRAMES; f++) {
     });
     slices.cat = CAT_BOX;
   }
-  // The same frame again with the cat purring. Only the cat's layer is kept: it becomes "alt/cat".
   prev = undefined;
   scene({ purr: f }, name => {
     const now = render();
@@ -581,7 +544,6 @@ for (let f = 0; f < FRAMES; f++) {
 }
 
 // Hidden layers the site needs: the purring cat (swapped in for the "cat" layer when it is clicked),
-// the hover outlines, and the bare unlit floor it tiles past the edges.
 {
   const layer = layers.push({ name: 'alt/cat', visible: false }) - 1;
   frames.forEach((fr, f) => fr.cels.push({ ...purring[f], layer }));

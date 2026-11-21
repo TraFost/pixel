@@ -10,16 +10,12 @@ import s from './PixelRoom.module.css';
 
 type Box = { x: number; y: number; w: number; h: number };
 
-// Reset by every full page load, kept while moving between pages: a refresh replays the tour,
-// coming Back from a page does not.
 let toured = false;
 
-// Everything is placed in percentages of the art, so it scales with the image.
 const pct = (n: number, of: number) => `${(n / of) * 100}%`;
 const place = (b: Box): CSSProperties => ({
   left: pct(b.x, room.w), top: pct(b.y, room.h), width: pct(b.w, room.w), height: pct(b.h, room.h),
 });
-// The hover layer, cropped to one hotspot.
 const outline = (b: Box): CSSProperties => ({
   backgroundSize: `${pct(room.w, b.w)} ${pct(room.h, b.h)}`,
   backgroundPosition: `${pct(b.x, room.w - b.w)} ${pct(b.y, room.h - b.h)}`,
@@ -27,42 +23,44 @@ const outline = (b: Box): CSSProperties => ({
 
 export function PixelRoom() {
   const stage = useRef<HTMLDivElement>(null);
-  const [step, setStep] = useState<number | null>(null); // tour step, or null when it is not running
+  const [step, setStep] = useState<number | null>(null);
+  const [lines, setLines] = useState(tour);
   const [sound, setSound] = useState(true);
   const [purring, setPurring] = useState(false);
-  const leftCat = useRef(-Infinity); // when the mouse last left the cat
-  const lit = step === null ? undefined : tour[step].spot;
+  const leftCat = useRef(-Infinity);
+  const lit = step === null ? undefined : lines[step].spot;
 
-  // When the room is wider than the screen, start centred on the desk.
   useLayoutEffect(() => {
     const el = stage.current!, boxes = sections.map(sec => room.hotspots[sec.key]);
     const mid = (Math.min(...boxes.map(b => b.x)) + Math.max(...boxes.map(b => b.x + b.w))) / 2;
     el.scrollLeft = (mid / room.w) * el.scrollWidth - el.clientWidth / 2;
   }, []);
 
+  const startTour = () => {
+    const el = stage.current!;
+    setLines(tour.filter(line => !line.pan || el.scrollWidth > el.clientWidth));
+    setStep(0);
+  };
   useEffect(() => {
-    if (!toured) setStep(0);
+    if (!toured) startTour();
   }, []);
   const endTour = () => {
     setStep(null);
     toured = true;
   };
 
-  // Bring the object being described into view (matters when the room pans).
   useEffect(() => {
     if (!lit) return;
     const el = stage.current!, b = room.hotspots[lit];
     el.scrollTo({ left: ((b.x + b.w / 2) / room.w) * el.scrollWidth - el.clientWidth / 2, behavior: 'smooth' });
   }, [lit]);
 
-  // Pet the cat: it purrs, eyes shut, for a few seconds.
   useEffect(() => {
     if (!purring) return;
     const timer = setTimeout(() => setPurring(false), PURR_SECONDS * 1000);
     return () => clearTimeout(timer);
   }, [purring]);
 
-  // The radio shows whether sound is on, wherever it was switched.
   useEffect(() => {
     setSound(soundWanted());
     const onSound = (e: Event) => setSound((e as CustomEvent<boolean>).detail);
@@ -80,7 +78,7 @@ export function PixelRoom() {
               src="/art/room.png"
               width={room.w}
               height={room.h}
-              unoptimized // the optimiser would resample and blur the pixels
+              unoptimized
               priority
               alt="A pixel-art room on a rainy night. Someone asleep in the bed under the window, a desk with a glowing CRT computer, floppy disks, a notebook and a telephone, an orange cat sitting on the chair, a print of Guts from Berserk above the lamp, and a bookshelf with a radio on top."
             />
@@ -118,8 +116,6 @@ export function PixelRoom() {
               style={place(room.hotspots.cat)}
               aria-label="Pet the cat"
               data-lit={lit === 'cat' || undefined}
-              // One meow per visit: staying on the cat stays quiet, and so does brushing back and forth
-              // over its edge. The mouse has to have been away for a moment first.
               onPointerEnter={e => { if (e.pointerType === 'mouse' && performance.now() - leftCat.current > 1500) play('meow'); }}
               onPointerLeave={() => { leftCat.current = performance.now(); }}
               onClick={() => { play('purr'); setPurring(true); }}
@@ -132,26 +128,33 @@ export function PixelRoom() {
       </div>
 
       {step === null
-        ? <button type="button" className={`btn ${s.help}`} aria-label="Show the tour again" onClick={() => setStep(0)}>?</button>
-        : <Tour step={step} onNext={() => (step + 1 < tour.length ? setStep(step + 1) : endTour())} onSkip={endTour} />}
+        ? <button type="button" className={`btn ${s.help}`} aria-label="Show the tour again" onClick={startTour}>?</button>
+        : <Tour lines={lines} step={step} onNext={() => (step + 1 < lines.length ? setStep(step + 1) : endTour())} onSkip={endTour} />}
     </>
   );
 }
 
-// A game-style dialogue box: the line types itself out, Next finishes the line or moves on.
-function Tour({ step, onNext, onSkip }: { step: number; onNext: () => void; onSkip: () => void }) {
-  const { text } = tour[step];
-  // How much of the line is typed, tagged with the step it belongs to. A count left over from the
-  // previous step reads as 0, so a new line can never flash up already written.
+function Tour({ lines, step, onNext, onSkip }: { lines: typeof tour; step: number; onNext: () => void; onSkip: () => void }) {
+  const { text } = lines[step];
   const [typed, setTyped] = useState({ step, n: 0 });
   const shown = typed.step === step ? typed.n : 0;
-  const next = useRef<HTMLButtonElement>(null);
-  const typing = shown < text.length, last = step === tour.length - 1;
+  const box = useRef<HTMLElement>(null), next = useRef<HTMLButtonElement>(null);
+  const [onTop, setOnTop] = useState(false);
+  const typing = shown < text.length, last = step === lines.length - 1;
+
+  useLayoutEffect(() => {
+    const check = () => {
+      const lit = document.querySelector('[data-lit]');
+      setOnTop(!!lit && lit.getBoundingClientRect().bottom > innerHeight - box.current!.offsetHeight - 16);
+    };
+    check();
+    addEventListener('resize', check);
+    return () => removeEventListener('resize', check);
+  }, [step]);
 
   useEffect(() => {
     next.current?.focus();
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setTyped({ step, n: text.length });
-    // Each tick adds one letter to whatever is there, so finishing the line early cannot be undone.
     const timer = setInterval(() => setTyped(t => (t.step !== step ? { step, n: 1 } : t.n < text.length ? { step, n: t.n + 1 } : t)), 24);
     return () => clearInterval(timer);
   }, [step, text]);
@@ -167,13 +170,12 @@ function Tour({ step, onNext, onSkip }: { step: number; onNext: () => void; onSk
   });
 
   return (
-    <section className={`${s.tour} paper`} aria-label="Tour of the room">
+    <section ref={box} className={`${s.tour} paper`} aria-label="Tour of the room" data-top={onTop || undefined}>
       <header>
         <span className="label">The room</span>
-        <span className={s.pips} aria-hidden>{tour.map((_, i) => <i key={i} data-done={i <= step || undefined} />)}</span>
-        <span className="sr-only">Step {step + 1} of {tour.length}</span>
+        <span className={s.pips} aria-hidden>{lines.map((_, i) => <i key={i} data-done={i <= step || undefined} />)}</span>
+        <span className="sr-only">Step {step + 1} of {lines.length}</span>
       </header>
-      {/* The untyped part is laid out but invisible, so the box never changes size. */}
       <p aria-hidden>{text.slice(0, shown)}<span className={s.ghost}>{text.slice(shown)}</span></p>
       <p className="sr-only" aria-live="polite">{text}</p>
       <footer>

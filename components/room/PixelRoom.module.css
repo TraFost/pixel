@@ -1,4 +1,4 @@
-/* The stage is the whole screen. If the room is wider than the screen it pans sideways. */
+
 .stage {
   height: 100dvh;
   container-type: size;
@@ -9,13 +9,9 @@
 .stage::-webkit-scrollbar {
   display: none;
 }
-
-/* Room size. It only grows in whole device pixels per art pixel, so every art pixel stays square:
-   as tall as fits, but never so wide that the desk can't be seen in one go. Whatever the art doesn't
-   cover is filled by carrying the wall and floor on past its edges (see ::before and ::after). */
 .scene {
-  --rh: max(270px, 100cqh); /* no round(): fill the height, pixels may be uneven */
-  --rw: calc(var(--rh) * 16 / 9);
+  --rh: max(270px, 100cqh);
+--rw: calc(var(--rh) * 16 / 9);
   position: relative;
   width: max(100cqw, var(--rw));
   height: 100cqh;
@@ -23,38 +19,36 @@
 }
 @supports (width: round(down, 100px, 10px)) {
   .scene {
-    --sy: 270px; /* one whole step of scale, as height and as width */
-    --sx: 480px;
-    --wide: 100cqw; /* landscape: the whole room stays on screen */
-    --rh: max(270px, min(round(down, 100cqh, var(--sy)), round(down, var(--wide), var(--sx)) * 9 / 16));
+    --sy: 270px;
+--sx: 480px;
+    --wide: 100cqw;
+--rh: max(270px, min(round(down, 100cqh, var(--sy)), round(down, var(--wide), var(--sx)) * 9 / 16));
   }
   @media (orientation: portrait) {
-    .scene { --wide: 206cqw; } /* about half the room on screen: the whole desk */
-  }
+    .scene { --wide: 206cqw; }
+}
   @media (min-resolution: 2dppx) {
-    .scene { --sy: 135px; --sx: 240px; } /* half steps are whole device pixels here */
-  }
+    .scene { --sy: 135px; --sx: 240px; }
+}
   @media (min-resolution: 3dppx) {
-    .scene { --sy: 90px; --sx: 160px; } /* and thirds here */
-  }
+    .scene { --sy: 90px; --sx: 160px; }
+}
 }
 
 .room {
   position: absolute;
-  isolation: isolate; /* so the fill below can sit behind the art with z-index: -1 */
-  left: calc((100% - var(--rw)) / 2);
+  isolation: isolate;
+left: calc((100% - var(--rw)) / 2);
   top: calc((100% - var(--rh)) / 2);
   width: var(--rw);
   height: var(--rh);
 }
 @supports (width: round(down, 100px, 10px)) {
-  .room { /* whole pixels only: half a pixel of offset would blur the art */
-    left: round(down, calc((100% - var(--rw)) / 2), 1px);
+  .room {
+left: round(down, calc((100% - var(--rw)) / 2), 1px);
     top: round(down, calc((100% - var(--rh)) / 2), 1px);
   }
 }
-
-/* Wall to the sides: the art's edge column, repeated. Above it, the stage's own background colour. */
 .room::after {
   content: '';
   position: absolute;
@@ -63,7 +57,6 @@
   height: calc(var(--floor) * 100%);
   background: url(/art/wall.png) repeat-x 0 0 / calc(var(--px) * var(--rh)) 100%;
 }
-/* Floor to the sides and below: the floor tile, lined up with the art's own planks. */
 .room::before {
   content: '';
   position: absolute;
@@ -85,15 +78,12 @@
   width: 100%;
   height: 100%;
 }
-
-/* Sprite strips: --n frames side by side, stepped one frame at a time. */
 .loop {
   position: absolute;
   pointer-events: none;
   background-size: calc(var(--n) * 100%) 100%;
   animation: strip steps(var(--n)) infinite;
 }
-/* The purring cat fills its own click target. */
 .spot .loop {
   inset: 0;
 }
@@ -110,7 +100,6 @@
   font: inherit;
   cursor: pointer;
 }
-/* Small objects still get a 44px target, without moving the label away from them. */
 .spot::after {
   content: '';
   position: absolute;
@@ -144,11 +133,9 @@
 .spot:is(:hover, :focus-visible, [data-lit]) :is(.hi, .tip) {
   opacity: 1;
 }
-/* No hover on touch screens, so the outlines stay on. */
 @media (hover: none) {
   .hi { opacity: 0.8; }
 }
-/* The tour points at an object: its outline blinks and an arrow bobs above it. */
 .spot[data-lit] .hi {
   animation: blink 0.8s steps(2, jump-none) infinite;
 }
@@ -168,8 +155,6 @@
 @keyframes bob {
   to { translate: 0 -6px; }
 }
-
-/* The tour: a dialogue box along the bottom, like the ones in old role-playing games. */
 .tour {
   position: fixed;
   left: 50%;
@@ -194,12 +179,41 @@
   gap: 1rem;
 }
 .tour p {
-  min-height: 4.05em; /* three lines: the box, and the Next button, stay put from step to step */
-  margin: 0.6rem 0 0.8rem;
+  min-height: 4.05em;
+margin: 0.6rem 0 0.8rem;
   font: 1.25rem/1.35 var(--font-display), sans-serif;
 }
 @media (max-width: 30rem) {
-  .tour p { min-height: 5.4em; } /* four lines on a phone */
+  .tour p { min-height: 5.4em; }
+}
+.tour[data-top] {
+  top: max(1rem, env(safe-area-inset-top));
+  bottom: auto;
+}
+@media (max-height: 30rem) {
+  .tour {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 1rem;
+    width: min(46rem, 100vw - 1.5rem);
+    padding: 0.5rem 0.75rem;
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+    outline: 0;
+  }
+  .tour[data-top] {
+    top: max(0.5rem, env(safe-area-inset-top));
+  }
+  .tour p {
+    grid-column: 1;
+    min-height: 4.05em;
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+  }
+  .tour footer {
+    grid-area: 1 / 2 / span 2;
+    gap: 0.5rem;
+  }
 }
 .ghost {
   visibility: hidden;

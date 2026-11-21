@@ -45,6 +45,9 @@ Rahman chose these. Do not reopen them.
 - Objects navigate to pages with an animated transition. There are no side panels.
 - No Playwright, no test suite.
 - The art source is an Aseprite file, and he wants it hand-drawn there eventually.
+- Touch screens show outlines but no object labels. The tour is how people learn what each object opens.
+- An upright tablet shows the desk large and pans, like a phone. It does not shrink the room to fit.
+  (Kept "for now": revisit only if Rahman asks.)
 
 ## How the site behaves
 

@@ -6,7 +6,6 @@ export const site = {
   role: 'Engineer · applied AI', // DRAFT. Page titles and search results only.
   headline: 'Rahman works on applied AI: meeting transcription, speaker attribution, and retrieval for sales agents.', // DRAFT. Screen readers and search only.
 
-  // Leave a value empty and the Contact page simply omits it.
   email: '',
   github: '',
   linkedin: '',
@@ -18,8 +17,6 @@ export const site = {
   ],
 };
 
-// The four pages, each behind an object in the room.
-// `file` is the window title, `loading` the line shown on the way in, `sfx` the sound it makes.
 export const sections = [
   { key: 'work', href: '/work', title: 'Work', object: 'the computer', file: 'WORK.EXE', loading: 'Booting WORK.EXE', sfx: 'crt' },
   { key: 'notes', href: '/notes', title: 'Notes', object: 'the floppy disks', file: 'A:\\NOTES', loading: 'Reading disk A:', sfx: 'floppy' },
@@ -27,9 +24,9 @@ export const sections = [
   { key: 'contact', href: '/contact', title: 'Contact', object: 'the telephone', file: 'TELEPHONE', loading: 'Dialling', sfx: 'dial' },
 ] as const;
 
-// The tour a first-time visitor gets, one line at a time. `spot` lights up an object in the room.
-export const tour: { spot?: (typeof sections)[number]['key'] | 'radio' | 'cat'; text: string }[] = [
+export const tour: { spot?: (typeof sections)[number]['key'] | 'radio' | 'cat'; pan?: true; text: string }[] = [
   { text: 'You made it in out of the rain. This room is the whole site. Let me show you around.' },
+  { pan: true, text: 'It is wider than your screen. Drag sideways to look around.' },
   { spot: 'work', text: 'The computer is still on. Click it for the work: projects and case studies.' },
   { spot: 'notes', text: 'The floppy disks are the notes. Short technical write-ups, one per disk.' },
   { spot: 'about', text: 'The notebook is the about page.' },
