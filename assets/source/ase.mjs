@@ -5,9 +5,6 @@ import { crc32, deflateSync, inflateSync } from 'node:zlib';
 const str = s => { const b = Buffer.from(s, 'utf8'), out = Buffer.alloc(2 + b.length); out.writeUInt16LE(b.length); b.copy(out, 2); return out; };
 const chunk = (type, data) => { const out = Buffer.alloc(6 + data.length); out.writeUInt32LE(out.length); out.writeUInt16LE(type, 4); data.copy(out, 6); return out; };
 
-// layers: [{ name, visible }] bottom to top.
-// frames: [{ ms, cels: [{ layer, x, y, w, h, rgba } | { layer, link }] }]
-// slices: { name: { x, y, w, h } }
 export function writeAse({ width, height, palette, layers, frames, tags = [], slices = {} }) {
   const first = [];
   { const b = Buffer.alloc(16); b.writeUInt16LE(1); first.push(chunk(0x2007, b)); } // colour profile: sRGB

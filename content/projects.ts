@@ -4,8 +4,7 @@ export type Project = {
   summary: string;
   tags: string[];
   draft?: boolean;
-  glance?: string[]; // three lines for someone who will not read the rest
-  // An empty body means "not written yet"; the page shows the heading as an outline.
+  glance?: string[];
   sections: { heading: string; body: string[] }[];
 };
 

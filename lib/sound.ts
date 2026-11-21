@@ -1,20 +1,18 @@
-// All sound is synthesised on demand. Sound is on by default and the radio in the room switches it.
-// Browsers only allow audio after a click or key press, so "on" really starts at the first one.
 export type Sfx = 'click' | 'floppy' | 'crt' | 'dial' | 'page' | 'blip' | 'meow' | 'purr';
 
 const KEY = 'rahman:sound';
 export const SOUND_EVENT = 'rahman:sound';
 
 let ctx: AudioContext | undefined;
-let on = false; // actually playing
-let armed = false; // wanted, waiting for the first gesture
+let on = false;
+let armed = false;
 let stopRain: (() => void) | undefined;
 const lastAt: Partial<Record<Sfx, number>> = {};
 
 function audio() {
   if (!ctx) {
     const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return; // no Web Audio: the site stays silent and fully usable
+    if (!AC) return;
     const a = (ctx = new AC());
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) a.suspend();
@@ -59,11 +57,9 @@ const FX: Record<Sfx, (a: AudioContext, t: number) => void> = {
   click: (a, t) => burst(a, t, 2400, 0.04, 0.25),
   floppy: (a, t) => { burst(a, t, 1800, 0.03, 0.2); burst(a, t + 0.09, 900, 0.06, 0.25); tone(a, t + 0.09, 110, 70, 0.12, 0.2); },
   crt: (a, t) => { tone(a, t, 60, 40, 0.25, 0.3); burst(a, t, 5000, 0.15, 0.06, 'highpass'); tone(a, t + 0.02, 9000, 9400, 0.5, 0.012); },
-  // three touch-tone digits: each is a low and a high sine together
   dial: (a, t) => [[697, 1209], [770, 1336], [852, 1477]].forEach(([lo, hi], i) => { tone(a, t + i * 0.1, lo, lo, 0.08, 0.07); tone(a, t + i * 0.1, hi, hi, 0.08, 0.07); }),
   page: (a, t) => burst(a, t, 3200, 0.14, 0.14, 'highpass'),
   blip: (a, t) => tone(a, t, 720, 700, 0.03, 0.04),
-  // A sawtooth voice through a band-pass "mouth" that opens and closes: mi-a-ow.
   meow: (a, t) => {
     const osc = a.createOscillator(), mouth = a.createBiquadFilter(), gain = a.createGain();
     osc.type = 'sawtooth';
@@ -83,7 +79,6 @@ const FX: Record<Sfx, (a: AudioContext, t: number) => void> = {
     osc.start(t);
     osc.stop(t + 0.62);
   },
-  // Low rumble chopped 25 times a second, for as long as the purring animation runs.
   purr: (a, t) => {
     const src = noise(a, PURR_SECONDS), low = a.createBiquadFilter(), rattle = a.createGain(), chop = a.createOscillator(), depth = a.createGain(), fade = a.createGain();
     low.type = 'lowpass';
@@ -104,10 +99,8 @@ const FX: Record<Sfx, (a: AudioContext, t: number) => void> = {
 };
 
 export const PURR_SECONDS = 3.6;
-// The shortest gap between two plays of the same sound.
 const GAP: Partial<Record<Sfx, number>> = { meow: 1, purr: PURR_SECONDS };
 
-// Rain sits at about a fifth of the effect level.
 function rain(a: AudioContext) {
   const src = noise(a, 2), band = a.createBiquadFilter(), out = a.createGain(), lfo = a.createOscillator(), depth = a.createGain();
   src.loop = true;
@@ -129,7 +122,6 @@ function rain(a: AudioContext) {
   };
 }
 
-// On unless the visitor has switched it off.
 export function soundWanted() {
   try { return localStorage.getItem(KEY) !== 'off'; } catch { return true; }
 }
@@ -137,7 +129,7 @@ export function soundWanted() {
 export function setSound(next: boolean) {
   on = next;
   armed = false;
-  try { localStorage.setItem(KEY, next ? 'on' : 'off'); } catch { /* private mode: preference just isn't kept */ }
+  try { localStorage.setItem(KEY, next ? 'on' : 'off'); } catch { /* private mode */ }
   if (next) {
     const a = audio();
     if (a && !stopRain) stopRain = rain(a);
@@ -152,7 +144,6 @@ export function toggleSound() {
   setSound(!(on || armed));
 }
 
-// Call once per page load: starts the sound at the first click or key press, if it is wanted.
 export function bootSound() {
   if (!soundWanted()) return;
   armed = true;
@@ -168,7 +159,7 @@ export function bootSound() {
 export function play(name: Sfx) {
   if (!on) return;
   const a = audio();
-  if (!a || a.currentTime - (lastAt[name] ?? -9) < (GAP[name] ?? 0.12)) return; // no spam
+  if (!a || a.currentTime - (lastAt[name] ?? -9) < (GAP[name] ?? 0.12)) return;
   lastAt[name] = a.currentTime;
   FX[name](a, a.currentTime);
 }

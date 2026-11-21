@@ -8,7 +8,8 @@ contributor needs to know belongs in this file. Do not add other Markdown files.
 ## Hard rules
 
 1. **Keep the codebase clean.** No dead code, unused files, commented-out code, leftover debug output or
-   temporary files. Delete what a change makes redundant, in the same change.
+   temporary files. Delete what a change makes redundant, in the same change. Do not leave unnecessary
+   comments above a function or component (nothing that only names or restates what the body does).
 2. **Follow the conventions already in the code.** They are listed under "Conventions". Do not introduce
    a second way of doing something the repo already does one way.
 3. **Never invent facts about Rahman**, his employers or his results.
@@ -23,7 +24,8 @@ opens a page; every page has one way out, back to the room.
 
 Stack: Next.js 16 (App Router), React 19, TypeScript. No other runtime dependencies. Package manager:
 **Bun**, which also runs the art scripts (`bun.lock` is committed; do not add `package-lock.json`, and do
-not use npm or call `node`). Git repo, branch `main`. There are no tests.
+not use npm or call `node`). Git repo, branch `main`; commit messages follow Conventional Commits
+(`feat:`, `chore:`), as the history does. There are no tests.
 
 ```
 bun install
@@ -67,6 +69,10 @@ Rahman chose these. Do not reopen them.
   button replays it. Esc or Skip ends it.
 - It must not talk about Rahman. It only explains the room.
 - The box must not change size between steps, and a new line must never flash up already written.
+- The box sits along the bottom and must never cover the object it is describing: when that object
+  reaches into the bottom strip, the box moves to the top for that step.
+- On a short screen (a phone on its side) the box becomes one thin strip, text left, buttons right.
+- A line marked `pan` is only said where the room is wider than the screen. It tells people to drag.
 - Pressing Next while a line is typing finishes the line; the next press moves on.
 
 **Moving between pages**
@@ -138,7 +144,10 @@ Match these. If you are unsure how to do something, find where the repo already 
 
 **Code style**
 - TypeScript, strict. Two-space indent, single quotes, semicolons.
-- Comment the why, in one line, where the code cannot show it. No comments that restate the code.
+- Agents must not add comments directly above a function or component unless the signature cannot express
+  the constraint. No labels like `// Handle click`, no boilerplate JSDoc on obvious exports. Comment only
+  non-obvious constraints, workarounds, or contracts—and put that on the line that needs it, not on the
+  signature.
 - Smallest change that fully does the job. No new dependency for a few lines of code, and no
   abstraction for a single use.
 - Copy and comments use British spelling (colour, synthesised).

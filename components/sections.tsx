@@ -1,4 +1,3 @@
-// The pages behind the room. Each one is a window, as if opened on the room's computer.
 import type { CSSProperties, ReactNode } from 'react';
 import { Back, Go } from '@/components/Travel';
 import { notes } from '@/content/notes';
@@ -9,11 +8,9 @@ import room from '@/components/room/room.json';
 type Box = { x: number; y: number; w: number; h: number };
 type SectionKey = (typeof sections)[number]['key'];
 
-// The three icon colours of the file window on the room's CRT.
 const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
 const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
 
-// A crop of the room art.
 export function Sprite({ box, scale = 2 }: { box: Box; scale?: number }) {
   const style: CSSProperties = {
     width: box.w * scale,
@@ -25,7 +22,6 @@ export function Sprite({ box, scale = 2 }: { box: Box; scale?: number }) {
   return <span aria-hidden className="sprite" style={style} />;
 }
 
-// The window every page lives in. `file` is the title-bar text; `status` goes in the bar along the bottom.
 export function Screen({ section, file, eyebrow, title, lede, sprite, status, children }: {
   section?: SectionKey; file?: string; eyebrow?: string; title: string; lede?: string; sprite?: ReactNode; status?: string; children: ReactNode;
 }) {
@@ -78,7 +74,6 @@ export function WorkList() {
   );
 }
 
-// One disk per note. `name` makes them an accordion: opening one closes the others.
 export function NotesList() {
   return (
     <div className="files">

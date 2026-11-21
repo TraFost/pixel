@@ -5,11 +5,10 @@ import { site } from '@/content/site';
 import '@/styles/tokens.css';
 import '@/styles/global.css';
 
-// next/font downloads these at build time and serves them from this site. Licences: /licenses.
 const sans = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-sans' });
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400'], variable: '--font-mono' });
-const pixel = Silkscreen({ subsets: ['latin'], weight: ['400'], variable: '--font-pixel' }); // tiny labels
-const display = Pixelify_Sans({ subsets: ['latin'], variable: '--font-display' }); // headings and dialogue
+const pixel = Silkscreen({ subsets: ['latin'], weight: ['400'], variable: '--font-pixel' });
+const display = Pixelify_Sans({ subsets: ['latin'], variable: '--font-display' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -21,7 +20,6 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: '#242a38' };
 
-// No header and no footer: the room is the menu, and every page has one way back to it.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable} ${pixel.variable} ${display.variable}`}>

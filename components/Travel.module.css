@@ -30,7 +30,6 @@
 .wrap[data-loading] .caption {
   opacity: 1;
 }
-/* A segmented loading bar that fills one block at a time. */
 .bar {
   width: 11.5rem;
   height: 1.1rem;

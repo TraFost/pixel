@@ -16,8 +16,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- type ----------
-   Pixel type for headings, labels and chrome. Sentences you actually read stay in Plex Sans. */
 h1,
 h2 {
   margin: 0;
@@ -74,7 +72,6 @@ a:hover {
   white-space: nowrap;
 }
 
-/* A button you can feel: it sinks into its own shadow when pressed. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -99,8 +96,6 @@ a:hover {
   box-shadow: none;
 }
 
-/* ---------- home ---------- */
-/* The room is the whole screen. */
 body:has(main.home) {
   height: 100dvh;
   overflow: hidden;
@@ -122,7 +117,6 @@ body:has(main.home) {
   image-rendering: auto;
 }
 
-/* Title bar: stays on screen, so Back is always one click away. */
 .titlebar {
   position: sticky;
   top: 0;
@@ -160,7 +154,6 @@ body:has(main.home) {
   height: 8px;
   background: var(--c-paper);
 }
-/* Reading progress: blocks fill along the bottom of the title bar as the page scrolls. */
 @supports (animation-timeline: scroll()) {
   .titlebar::after {
     content: '';
@@ -196,7 +189,6 @@ body:has(main.home) {
 .page-head h1 {
   margin-top: 0.35rem;
 }
-/* A crop of the room, kept in whole pixels. */
 .sprite {
   display: block;
   flex: none;
@@ -223,7 +215,6 @@ body:has(main.home) {
   margin-bottom: 0;
 }
 
-/* Small coloured squares, as on the room's CRT. */
 .ico {
   display: inline-block;
   flex: none;
@@ -231,7 +222,6 @@ body:has(main.home) {
   height: 14px;
 }
 
-/* File rows: work entries and note disks. The hovered row lights up like the selected row on the CRT. */
 .files {
   margin: 0;
   padding: 0;
@@ -284,10 +274,9 @@ body:has(main.home) {
   rotate: 90deg;
 }
 .files details > .prose {
-  padding: 1.1rem 0.75rem 1.4rem calc(0.75rem + 14px + 0.9rem); /* lined up under the title */
+  padding: 1.1rem 0.75rem 1.4rem calc(0.75rem + 14px + 0.9rem);
 }
 
-/* Quick read: the three lines to take away. */
 .glance {
   margin-bottom: 2rem;
   padding: 0.9rem 1.1rem 1rem;
@@ -324,7 +313,6 @@ body:has(main.home) {
   background: var(--c-sage);
 }
 
-/* Numbered parts, short enough to read one at a time. */
 .chapter + .chapter {
   margin-top: 2.25rem;
   padding-top: 1.75rem;
@@ -344,7 +332,7 @@ body:has(main.home) {
   translate: 0 -0.2rem;
 }
 .chapter:not(:has(p, li)) {
-  color: var(--muted); /* an outline heading with nothing under it yet */
+  color: var(--muted);
 }
 
 .draft {

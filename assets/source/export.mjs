@@ -26,7 +26,6 @@ const shots = frames.map((_, f) => flatten(ase, f));
 out('room.png', W, H, shots[0]);
 out('room-hi.png', W, H, layer('hover'));
 
-// The floor tile is the rows of the "floor tile" layer that have pixels.
 const floor = layer('floor tile');
 let top = 0, bottom = H;
 while (top < H && !floor[top * W * 4 + 3]) top++;
@@ -35,8 +34,6 @@ const tile = Buffer.alloc(W * (bottom - top) * 4);
 blit(floor, W, { x: 0, y: top, w: W, h: bottom - top }, tile, W);
 out('floor.png', W, bottom - top, tile);
 
-// The wall past the edges: the art's right-hand column above the floor, repeated sideways by the page.
-// Keep that column free of objects.
 const wall = Buffer.alloc(top * 4);
 blit(shots[0], W, { x: W - 1, y: 0, w: 1, h: top }, wall, 1);
 out('wall.png', 1, top, wall);
@@ -53,7 +50,6 @@ for (const [name, box] of Object.entries(slices)) {
 }
 for (const need of ['work', 'notes', 'about', 'contact', 'radio', 'cat']) if (!hotspots[need]) throw new Error(`room.aseprite has no slice named "${need}".`);
 
-// "alt/<name>" layers: every frame of slice <name>, with that layer standing in for the layer <name>.
 for (const alt of ase.layers.filter(l => l.name.startsWith('alt/'))) {
   const name = alt.name.slice(4), box = hotspots[name];
   if (!box) throw new Error(`Layer "${alt.name}" needs a slice named "${name}".`);
@@ -62,7 +58,6 @@ for (const alt of ase.layers.filter(l => l.name.startsWith('alt/'))) {
   out(`${name}-alt.png`, box.w * frames.length, box.h, strip);
 }
 
-// Social card: the room at 2x on a night field.
 const og = Buffer.alloc(1200 * 630 * 4);
 for (let i = 0; i < 1200 * 630; i++) og.set([0x24, 0x2a, 0x38, 255], i * 4);
 blit(shots[0], W, { x: 0, y: 0, w: W, h: H }, og, 1200, 120, 45, 2);
@@ -73,7 +68,6 @@ writeFileSync('components/room/room.json', JSON.stringify({
   floor: { y: top, h: bottom - top }, wall: '#' + shots[0].subarray((W - 1) * 4, (W - 1) * 4 + 3).toString('hex'), hotspots, loops, crops,
 }, null, 2) + '\n');
 
-// Dev aid: `ZOOM=x,y,w,h,scale bun run art` also writes an enlarged crop to zoom.png.
 if (process.env.ZOOM) {
   const [x, y, w, h, s] = process.env.ZOOM.split(',').map(Number), zoom = Buffer.alloc(w * s * h * s * 4);
   blit(shots[0], W, { x, y, w, h }, zoom, w * s, 0, 0, s);
