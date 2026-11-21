@@ -1,0 +1,9 @@
+node_modules
+.next
+next-env.d.ts
+*.tsbuildinfo
+zoom.png
+package-lock.json
+
+*.md
+!AGENTS.md
