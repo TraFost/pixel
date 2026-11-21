@@ -1,0 +1,253 @@
+/* The stage is the whole screen. If the room is wider than the screen it pans sideways. */
+.stage {
+  height: 100dvh;
+  container-type: size;
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.stage::-webkit-scrollbar {
+  display: none;
+}
+
+/* Room size. It only grows in whole device pixels per art pixel, so every art pixel stays square:
+   as tall as fits, but never so wide that the desk can't be seen in one go. Whatever the art doesn't
+   cover is filled by carrying the wall and floor on past its edges (see ::before and ::after). */
+.scene {
+  --rh: max(270px, 100cqh); /* no round(): fill the height, pixels may be uneven */
+  --rw: calc(var(--rh) * 16 / 9);
+  position: relative;
+  width: max(100cqw, var(--rw));
+  height: 100cqh;
+  overflow: hidden;
+}
+@supports (width: round(down, 100px, 10px)) {
+  .scene {
+    --sy: 270px; /* one whole step of scale, as height and as width */
+    --sx: 480px;
+    --wide: 100cqw; /* landscape: the whole room stays on screen */
+    --rh: max(270px, min(round(down, 100cqh, var(--sy)), round(down, var(--wide), var(--sx)) * 9 / 16));
+  }
+  @media (orientation: portrait) {
+    .scene { --wide: 206cqw; } /* about half the room on screen: the whole desk */
+  }
+  @media (min-resolution: 2dppx) {
+    .scene { --sy: 135px; --sx: 240px; } /* half steps are whole device pixels here */
+  }
+  @media (min-resolution: 3dppx) {
+    .scene { --sy: 90px; --sx: 160px; } /* and thirds here */
+  }
+}
+
+.room {
+  position: absolute;
+  isolation: isolate; /* so the fill below can sit behind the art with z-index: -1 */
+  left: calc((100% - var(--rw)) / 2);
+  top: calc((100% - var(--rh)) / 2);
+  width: var(--rw);
+  height: var(--rh);
+}
+@supports (width: round(down, 100px, 10px)) {
+  .room { /* whole pixels only: half a pixel of offset would blur the art */
+    left: round(down, calc((100% - var(--rw)) / 2), 1px);
+    top: round(down, calc((100% - var(--rh)) / 2), 1px);
+  }
+}
+
+/* Wall to the sides: the art's edge column, repeated. Above it, the stage's own background colour. */
+.room::after {
+  content: '';
+  position: absolute;
+  inset: 0 -100cqw auto;
+  z-index: -1;
+  height: calc(var(--floor) * 100%);
+  background: url(/art/wall.png) repeat-x 0 0 / calc(var(--px) * var(--rh)) 100%;
+}
+/* Floor to the sides and below: the floor tile, lined up with the art's own planks. */
+.room::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--floor) * 100%) -100cqw auto;
+  z-index: -1;
+  height: 100cqh;
+  background: url(/art/floor.png) 100cqw 0 / var(--rw) calc((1 - var(--floor)) * var(--rh));
+}
+
+.base,
+.loop,
+.hi,
+.room::before,
+.room::after {
+  image-rendering: pixelated;
+}
+.base {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sprite strips: --n frames side by side, stepped one frame at a time. */
+.loop {
+  position: absolute;
+  pointer-events: none;
+  background-size: calc(var(--n) * 100%) 100%;
+  animation: strip steps(var(--n)) infinite;
+}
+/* The purring cat fills its own click target. */
+.spot .loop {
+  inset: 0;
+}
+@keyframes strip {
+  to { background-position-x: calc(var(--n) / (var(--n) - 1) * 100%); }
+}
+
+.spot {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+/* Small objects still get a 44px target, without moving the label away from them. */
+.spot::after {
+  content: '';
+  position: absolute;
+  inset: min(0px, (100% - 44px) / 2);
+}
+.spot:focus-visible {
+  outline: 2px solid var(--c-amber);
+  outline-offset: 2px;
+}
+.hi {
+  position: absolute;
+  inset: 0;
+  background-image: url(/art/room-hi.png);
+  opacity: 0;
+}
+.tip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 1;
+  padding: 3px 8px 5px;
+  font: 0.75rem/1 var(--font-pixel), monospace;
+  white-space: nowrap;
+  color: var(--c-ink);
+  background: var(--c-paper);
+  box-shadow: 2px 2px 0 var(--c-n0);
+  opacity: 0;
+  pointer-events: none;
+}
+.spot:is(:hover, :focus-visible, [data-lit]) :is(.hi, .tip) {
+  opacity: 1;
+}
+/* No hover on touch screens, so the outlines stay on. */
+@media (hover: none) {
+  .hi { opacity: 0.8; }
+}
+/* The tour points at an object: its outline blinks and an arrow bobs above it. */
+.spot[data-lit] .hi {
+  animation: blink 0.8s steps(2, jump-none) infinite;
+}
+.spot[data-lit]::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 9px);
+  bottom: calc(100% + 6px);
+  border: 9px solid transparent;
+  border-top: 12px solid var(--c-amber);
+  border-bottom: 0;
+  animation: bob 0.6s steps(2, jump-none) infinite alternate;
+}
+@keyframes blink {
+  to { opacity: 0.35; }
+}
+@keyframes bob {
+  to { translate: 0 -6px; }
+}
+
+/* The tour: a dialogue box along the bottom, like the ones in old role-playing games. */
+.tour {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  z-index: 2;
+  width: min(34rem, 100vw - 1.5rem);
+  padding: 0.75rem 1rem 0.9rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 3px solid var(--c-n0);
+  outline: 3px solid var(--c-paper);
+  outline-offset: -9px;
+  box-shadow: 6px 6px 0 var(--c-n0);
+  animation: rise 0.25s steps(4) backwards;
+}
+.tour header,
+.tour footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.tour p {
+  min-height: 4.05em; /* three lines: the box, and the Next button, stay put from step to step */
+  margin: 0.6rem 0 0.8rem;
+  font: 1.25rem/1.35 var(--font-display), sans-serif;
+}
+@media (max-width: 30rem) {
+  .tour p { min-height: 5.4em; } /* four lines on a phone */
+}
+.ghost {
+  visibility: hidden;
+}
+.pips {
+  display: flex;
+  gap: 4px;
+}
+.pips i {
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--c-ink);
+}
+.pips i[data-done] {
+  background: var(--c-amber);
+}
+.skip {
+  min-height: 44px;
+  padding: 0 0.5rem;
+  font: 0.75rem var(--font-pixel), monospace;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.blink {
+  animation: blink 0.5s steps(2, jump-none) infinite alternate;
+}
+@keyframes rise {
+  from { translate: -50% 1rem; opacity: 0; }
+}
+
+.help {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  width: 44px;
+  font-family: var(--font-pixel), monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loop,
+  .tour,
+  .blink,
+  .spot[data-lit] .hi,
+  .spot[data-lit]::before {
+    animation: none;
+  }
+}

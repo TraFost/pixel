@@ -1,0 +1,31 @@
+/* Palette: the seven plan colours, plus the extra steps the pages need. The art's full ramp
+   list is in AGENTS.md. */
+:root {
+  --c-paper: #f4eedf;
+  --c-ink: #292d32;
+  --c-shadow: #525761;
+  --c-blue: #738a9b;
+  --c-sage: #8c9b7c;
+  --c-amber: #c58a52;
+  --c-night: #242a38;
+  --c-n0: #14171f; /* deepest night: borders and hard shadows */
+  --c-cream: #f1d3a0; /* the selected-row colour on the room's CRT */
+  --c-blue-light: #9db1be; /* muted text on night, 6.47:1 */
+  --c-amber-deep: #8a5a2b; /* accent on paper, 5.07:1 (plain amber is 2.54:1) */
+
+  /* The site is night by default: the room's wall. */
+  --bg: var(--c-night);
+  --fg: var(--c-paper);
+  --muted: var(--c-blue-light);
+  --accent: var(--c-amber);
+  --rule: #323a4b;
+}
+
+/* Anything made of paper: page windows, the tour box. */
+.paper {
+  --bg: var(--c-paper);
+  --fg: var(--c-ink);
+  --muted: var(--c-shadow);
+  --accent: var(--c-amber-deep);
+  --rule: #d6cdb8;
+}

@@ -1,0 +1,52 @@
+.wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.wrap[data-on] {
+  visibility: visible;
+  pointer-events: auto; /* nothing underneath is clickable mid-trip */
+}
+.wrap canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  image-rendering: pixelated;
+}
+
+.caption {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.9rem;
+  font: 1rem/1.2 var(--font-pixel), monospace;
+  opacity: 0;
+}
+.wrap[data-loading] .caption {
+  opacity: 1;
+}
+/* A segmented loading bar that fills one block at a time. */
+.bar {
+  width: 11.5rem;
+  height: 1.1rem;
+  padding: 3px;
+  border: 3px solid;
+}
+.bar::before {
+  content: '';
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, currentColor 0 0.75rem, transparent 0.75rem 1rem);
+  clip-path: inset(0 100% 0 0);
+}
+.wrap[data-loading] .bar::before {
+  animation: fill 0.4s steps(8) forwards;
+}
+@keyframes fill {
+  to { clip-path: inset(0); }
+}
