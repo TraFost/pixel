@@ -88,7 +88,21 @@ Rahman chose these. Do not reopen them.
   status bar.
 - Back, and Esc, always go to the room. Never add links from one section to another.
   `/work` → `/work/[slug]` is the only page-to-page link.
-- Notes open in place as an accordion on `/notes`. There are no per-note pages.
+- Every page that reads (`Reader`) fills the block bar under the title bar as it scrolls, and lets
+  sections below the fold fade up as they arrive. Nothing already on screen is ever hidden.
+- **Work** is a game menu: a cursor steps in beside the hovered or focused row, and ↑ ↓ move between rows.
+- Pages that are read fill the whole screen, like a maximised window: every case study, and a note
+  once it is open. They mark their `Reader` as `full`. The lists, About and Contact stay windowed.
+- **Case studies** have a hero with facts, a chapter list that sticks (a rail on desktop, a strip
+  under the title bar on narrow screens) and marks the chapter being read, then the chapters.
+- **Notes** has no per-note routes. `/notes` shows an index with category filters; `/notes#slug` shows
+  that note alone, in the same window. "All notes" returns to the index, the browser's back button
+  works, and Back or Esc still go to the room. Without JavaScript every note is listed under the index.
+- **About** is a scrapbook: a timeline worked like tabs (← → move), and prints from the room taped to
+  the page. The cat's print meows.
+- **Contact** is a sheet of writing paper, with no picture on it. The links come first and are never hidden. The envelope
+  under them opens to a short letter and a button that copies the address.
+- Chapters and notes can hold figures (interactive diagrams) and code, as well as paragraphs.
 
 **Sound**
 - Everything is synthesised in `lib/sound.ts` with Web Audio. There are no audio files.
@@ -100,11 +114,15 @@ Rahman chose these. Do not reopen them.
 |---|---|
 | `content/site.ts` | Name, contact details, the four sections, the tour lines |
 | `content/projects.ts`, `content/notes.ts` | Case studies and notes, as typed data |
+| `content/blocks.ts` | What a chapter or note body is made of: paragraphs, code, figures |
 | `app/` | Routes. `layout.tsx` loads fonts and mounts the transition overlay |
 | `components/room/PixelRoom.tsx` (+ `.module.css`) | The room, hotspots, radio, cat, tour |
 | `components/room/room.json` | **Generated.** Sizes and boxes for hotspots, loops and crops |
 | `components/Travel.tsx` (+ `.module.css`) | Page transition, `Go` link, `Back` button, sound boot, M key |
-| `components/sections.tsx` | Page window and the list components |
+| `components/sections.tsx` | Page window (`Screen`), art crops (`Sprite`), body renderer (`Prose`) |
+| `components/Reader.tsx` | Reading progress, chapter list, reveal on scroll |
+| `components/Figure.tsx` | The interactive figures, by name |
+| `components/Work.tsx`, `Notes.tsx`, `About.tsx`, `Contact.tsx` | The interactive part of each page (each with its CSS Module) |
 | `lib/sound.ts` | All sounds and the on/off state |
 | `styles/tokens.css`, `styles/global.css` | Colours and page styles |
 | `assets/source/room.aseprite` | **The art source** |
@@ -128,8 +146,14 @@ Match these. If you are unsure how to do something, find where the repo already 
 - One component file per concern, not per component: small helpers live beside what uses them.
 
 **Navigation**
-- Internal links use the `Go` component. Never a bare `<a href="/…">` and never `next/link`: both skip
-  the transition.
+- Links to another page use the `Go` component. Never a bare `<a href="/…">` and never `next/link`: both
+  skip the transition. Links within a page (`#chapter`, `#note`) are plain anchors.
+
+**Content blocks**
+- A chapter or note body is a list of blocks (`content/blocks.ts`): a string is a paragraph,
+  `{ code, caption }` is a snippet, `{ figure, caption }` is an interactive figure.
+- A new figure is a new name in `FigureName` and a component in `Figure.tsx`. A figure must show
+  something true about the site, work from the keyboard, and announce its result in text.
 
 **Styling**
 - A component with its own behaviour gets a CSS Module next to it (`PixelRoom`, `Travel`). Page styling
@@ -240,6 +264,8 @@ Once Rahman starts drawing in Aseprite, stop using the seed script.
 - Lines marked `DRAFT` in `content/site.ts` are guesses and still need Rahman's confirmation. Empty
   contact fields stay empty until he fills them. The site URL there is a placeholder.
 - Two case studies are deliberate outlines. Do not write their bodies without real input from him.
+- The About timeline (`timeline` in `content/site.ts`) has one written entry. The others have a title
+  only and show as blank pages with `????` for the year. Fill them only with dates and stories he gives.
 - Text on the site about how it was built must stay true. When behaviour changes, update the "This room"
   case study and the notes in the same change.
 - Voice: specific and plain. No stock portfolio phrases.
