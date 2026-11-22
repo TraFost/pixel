@@ -1,0 +1,147 @@
+.sheet {
+  max-width: 34rem;
+  padding: 1.5rem 1.5rem 1.75rem 2.25rem;
+  background: var(--c-paper);
+  border: 3px solid var(--c-ink);
+  border-left: 12px solid var(--c-blue);
+  box-shadow: 6px 6px 0 var(--rule);
+}
+.head {
+  padding-bottom: 1.1rem;
+  border-bottom: 3px solid var(--c-ink);
+}
+.name {
+  margin: 0.2rem 0 0;
+  font: 600 2.5rem/1 var(--font-display), sans-serif;
+}
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lines a {
+  display: grid;
+  gap: 0.15rem;
+  min-height: 44px;
+  padding: 0.85rem 0.5rem;
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  border-bottom: 3px dotted var(--rule);
+}
+.lines a:is(:hover, :focus-visible) {
+  color: inherit;
+  background: var(--c-cream);
+  outline: 0;
+}
+.none {
+  margin: 1.25rem 0 0;
+}
+
+.post {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  margin-top: 1.5rem;
+}
+.envelope {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.envelope svg {
+  display: block;
+  width: 192px;
+  shape-rendering: crispEdges;
+}
+.envelope:hover svg {
+  translate: 0 -3px;
+}
+.ink {
+  fill: var(--c-ink);
+}
+.paper {
+  fill: var(--c-paper);
+}
+.back {
+  fill: var(--c-shadow);
+}
+.pocket {
+  fill: var(--c-cream);
+}
+.fold {
+  fill: none;
+  stroke: var(--c-ink);
+  stroke-width: 2;
+}
+.lid {
+  fill: var(--c-cream);
+}
+.seal {
+  fill: var(--c-amber-deep);
+}
+.flap,
+.raised {
+  transform-box: fill-box;
+  transform-origin: top;
+}
+.raised {
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+.envelope[aria-expanded='true'] .flap {
+  transform: scaleY(0);
+}
+.envelope[aria-expanded='true'] .raised {
+  transform: scaleY(1);
+}
+/* Shut, the letter is out of sight: its corners would otherwise show past the flap. */
+.sheetIn {
+  visibility: hidden;
+}
+.envelope[aria-expanded='true'] .sheetIn {
+  visibility: visible;
+  transform: translateY(-20px);
+}
+
+.letter {
+  flex: 1 1 12rem;
+  animation: unfold 0.25s steps(5);
+}
+.letter p {
+  margin: 0 0 0.9rem;
+}
+.letter p:last-child {
+  margin: 0;
+}
+
+@keyframes unfold {
+  from { opacity: 0; translate: 0 0.75rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .envelope svg {
+    transition: translate 0.12s steps(3);
+  }
+  .flap,
+  .raised {
+    transition: transform 0.24s steps(4);
+  }
+  .sheetIn {
+    transition: transform 0.24s steps(4), visibility 0s 0.24s;
+  }
+  .envelope[aria-expanded='true'] :is(.raised, .sheetIn) {
+    transition-delay: 0.24s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .letter {
+    animation: none;
+  }
+}

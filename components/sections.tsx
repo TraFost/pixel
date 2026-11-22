@@ -1,4 +1,3 @@
-import { site } from '@/content/site';
 import type { CSSProperties, ReactNode } from 'react';
 import { Figure } from '@/components/Figure';
 import { Back } from '@/components/Travel';
@@ -71,27 +70,4 @@ export function Prose({ blocks }: { blocks: Block[] }) {
       </figure>
     );
   });
-}
-
-const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
-const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
-export function ContactList() {
-  const links = [
-    site.email && { label: 'Email', href: `mailto:${site.email}`, text: site.email },
-    site.github && { label: 'GitHub', href: site.github, text: site.github.replace(/^https?:\/\//, '') },
-    site.linkedin && { label: 'LinkedIn', href: site.linkedin, text: site.linkedin.replace(/^https?:\/\//, '') },
-    site.cv && { label: 'CV', href: site.cv, text: 'Download (PDF)' },
-  ].filter(Boolean) as { label: string; href: string; text: string }[];
-
-  if (!links.length) return <p>The line is not connected yet. Contact details are coming.</p>;
-  return (
-    <dl className="contact">
-      {links.map((l, i) => (
-        <div key={l.label}>
-          <dt className="label">{icon(i)}{l.label}</dt>
-          <dd><a href={l.href}>{l.text}</a></dd>
-        </div>
-      ))}
-    </dl>
-  );
 }
