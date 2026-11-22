@@ -2,8 +2,8 @@
 
 Guide for any agent working in this repo. Read it before changing files.
 
-This is the only documentation in version control: `.gitignore` excludes every other `*.md`. Anything a
-contributor needs to know belongs in this file. Do not add other Markdown files.
+`README.md` is the short project introduction. Contributor guidance belongs in this file.
+`.gitignore` excludes all other Markdown files. Do not add other Markdown files.
 
 ## Hard rules
 
