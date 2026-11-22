@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import room from '@/components/room/room.json';
-import { Screen, Sprite } from '@/components/sections';
+import { Reader } from '@/components/Reader';
+import { pad, Prose, Screen, Sprite } from '@/components/sections';
+import { minutes } from '@/content/blocks';
 import { getProject, projects } from '@/content/projects';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -17,7 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProjectPage({ params }: Props) {
   const project = getProject((await params).slug);
   if (!project) notFound();
-  const words = project.sections.flatMap(s => s.body).join(' ').split(' ').length;
+  const chapters = project.sections.map(s => ({ ...s, id: s.heading.toLowerCase().replace(/[^a-z]+/g, '-') }));
+  const length = project.draft ? 'Outline' : `${minutes(project.sections.flatMap(s => s.body))} min read`;
 
   return (
     <Screen
@@ -25,24 +28,27 @@ export default async function ProjectPage({ params }: Props) {
       eyebrow={project.tags.join(' · ')}
       title={project.title}
       lede={project.summary}
-      sprite={project.slug === 'pixel-room' ? <Sprite box={room.crops.print} scale={3} /> : <Sprite box={room.hotspots.work} scale={1} />}
-      status={project.draft ? 'outline only' : `${project.sections.length} parts · ${Math.max(1, Math.round(words / 200))} min read`}
+      facts={[...(project.facts ?? []), ['Length', length]]}
+      sprite={project.slug === 'pixel-room' && <Sprite box={room.crops.print} scale={4} />}
+      status={`${chapters.length} chapters · ${length.toLowerCase()}`}
     >
-      {project.glance && (
-        <aside className="glance">
-          <p className="label">Quick read</p>
-          <ul>{project.glance.map(g => <li key={g}>{g}</li>)}</ul>
-        </aside>
-      )}
-      {project.draft && <p className="draft">This case study is an outline. The headings are here; the writing is not yet.</p>}
-      <div className="prose">
-        {project.sections.map((s, i) => (
-          <section key={s.heading} className="chapter">
-            <h2><span className="num" aria-hidden>{String(i + 1).padStart(2, '0')}</span>{s.heading}</h2>
-            {s.body.map(p => <p key={p}>{p}</p>)}
-          </section>
-        ))}
-      </div>
+      <Reader full chapters={chapters.map(c => ({ id: c.id, title: c.heading }))}>
+        {project.glance && (
+          <aside className="glance">
+            <p className="label">Quick read</p>
+            <ul>{project.glance.map(g => <li key={g}>{g}</li>)}</ul>
+          </aside>
+        )}
+        {project.draft && <p className="draft">This case study is an outline. The chapters are here; the writing is not yet.</p>}
+        <div className="prose">
+          {chapters.map((c, i) => (
+            <section key={c.id} id={c.id} className="chapter" tabIndex={-1}>
+              <h2><span className="num" aria-hidden>{pad(i + 1)}</span>{c.heading}</h2>
+              {c.body.length ? <Prose blocks={c.body} /> : <p className="unwritten">Not written yet.</p>}
+            </section>
+          ))}
+        </div>
+      </Reader>
     </Screen>
   );
 }

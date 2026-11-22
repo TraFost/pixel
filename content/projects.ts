@@ -1,3 +1,5 @@
+import type { Block } from './blocks';
+
 export type Project = {
   slug: string;
   title: string;
@@ -5,11 +7,12 @@ export type Project = {
   tags: string[];
   draft?: boolean;
   glance?: string[];
-  sections: { heading: string; body: string[] }[];
+  facts?: [label: string, value: string][];
+  sections: { heading: string; body: Block[] }[];
 };
 
 const outline = ['Problem', 'Constraints', 'Architecture', 'My part', 'Trade-offs', 'Results', 'Lessons']
-  .map(heading => ({ heading, body: [] }));
+  .map(heading => ({ heading, body: [] as Block[] }));
 
 export const projects: Project[] = [
   {
@@ -33,6 +36,7 @@ export const projects: Project[] = [
     title: 'This room',
     summary: 'A portfolio that is one 480×270 pixel room, filling the screen, with every sound synthesised.',
     tags: ['personal', 'Next.js', 'pixel art', 'Web Audio'],
+    facts: [['Year', '2026'], ['Part', 'Planning, art direction'], ['Stack', 'Next.js, React, Web Audio'], ['Art', '480×270, 27 colours']],
     glance: [
       'The whole site is one 480×270 Aseprite file, shown only at whole-pixel scales.',
       'Click targets and animated regions are stored in the art file, so they cannot drift from the drawing.',
@@ -57,6 +61,7 @@ export const projects: Project[] = [
         body: [
           'The room is one Aseprite file: 480×270, seventeen layers, a twelve-frame loop and a palette of 27 colours. Named slices mark the click targets and the regions that animate. The build reads that file directly and writes the images the page uses, so Aseprite is only needed for drawing.',
           'The first version of every layer was typed, not drawn. A script stored a material and a brightness for each pixel, let three light sources (lamp, monitor, window) raise the brightness, and picked colours from each material’s ramp with a narrow dither. That gave consistent lighting to start from. The file is laid out so that each layer can be redrawn by hand, one at a time, without touching code.',
+          { figure: 'pipeline', caption: 'From the drawing to the page. Press a step.' },
         ],
       },
       {
@@ -64,6 +69,7 @@ export const projects: Project[] = [
         body: [
           'The click targets are slices in the same file as the art, and the hover outlines are a hidden layer in it. Move the telephone in Aseprite, move its slice with it, and the page follows on the next build.',
           'Each object is a plain link. Click one and the screen dissolves into big pixels spreading out from it, a one-line loader shows (the computer boots, the disk is read, the telephone dials), and the page dissolves back in. Without JavaScript it is still a link.',
+          { code: '"contact": { "x": 327, "y": 110, "w": 45, "h": 19 }', caption: 'The telephone’s click target in room.json, written by the build from the slice in the art file.' },
         ],
       },
       {
@@ -71,6 +77,7 @@ export const projects: Project[] = [
         body: [
           'The room fills the window, but only at whole numbers of screen pixels per art pixel, so nothing shimmers. Whatever the art does not cover is filled by carrying the room on. The wall’s edge column repeats sideways. The floor is a tile whose planks wrap, so it continues in every direction without a seam.',
           'On a phone held upright the room is wider than the screen. It starts centred on the desk and you drag to look around.',
+          { figure: 'scale', caption: 'The print above the lamp, scaled to fit and snapped to a whole step. Drag the slider.' },
         ],
       },
       {
