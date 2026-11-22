@@ -1,4 +1,3 @@
-import { notes } from '@/content/notes';
 import { site } from '@/content/site';
 import type { CSSProperties, ReactNode } from 'react';
 import { Figure } from '@/components/Figure';
@@ -76,28 +75,6 @@ export function Prose({ blocks }: { blocks: Block[] }) {
 
 const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
 const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
-export function NotesList() {
-  return (
-    <div className="files">
-      {notes.map((n, i) => (
-        <details key={n.slug} id={n.slug} name="note">
-          <summary>
-            {icon(i)}
-            <span>
-              <strong>{n.title}</strong>
-              <span>{n.summary}</span>
-              <span className="meta"><time dateTime={n.date}>{n.date}</time> · {Math.max(1, Math.round(n.body.join(' ').split(' ').length / 200))} min read</span>
-            </span>
-            <b aria-hidden>▶</b>
-          </summary>
-          <div className="prose">{n.body.map(p => <p key={p}>{p}</p>)}</div>
-        </details>
-      ))}
-    </div>
-  );
-}
-
-
 export function AboutBody() {
   return <>{site.about.map(p => <p key={p}>{p}</p>)}</>;
 }

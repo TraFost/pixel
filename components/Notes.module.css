@@ -1,0 +1,158 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  font: 0.75rem/1 var(--font-pixel), monospace;
+  color: var(--c-ink);
+  background: none;
+  border: 3px solid var(--c-ink);
+  cursor: pointer;
+}
+.tabs button span {
+  color: var(--muted);
+}
+.tabs button:hover {
+  background: var(--c-cream);
+}
+.tabs button[aria-pressed='true'] {
+  color: var(--c-paper);
+  background: var(--c-ink);
+}
+.tabs button[aria-pressed='true'] span {
+  color: inherit;
+}
+
+.index {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 3px solid var(--c-ink);
+}
+.index li {
+  border-bottom: 3px solid var(--c-ink);
+}
+.index a {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.4rem 0.9rem;
+  color: inherit;
+  text-decoration: none;
+}
+.index a > span {
+  display: grid;
+  gap: 0.45rem;
+}
+.index strong {
+  font: 600 1.6rem/1.1 var(--font-display), sans-serif;
+}
+.index a > span > span {
+  max-width: 34rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+.index a > span > span:last-child {
+  font-size: 1rem;
+  color: var(--muted);
+}
+.index a:is(:hover, :focus-visible) {
+  color: inherit;
+  background: var(--c-cream);
+  outline: 0;
+}
+.index a:is(:hover, :focus-visible) .disk {
+  translate: 0 -6px;
+}
+
+.disk {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 46px;
+  margin-top: 0.2rem;
+  background: var(--c-blue);
+  border: 3px solid var(--c-n0);
+}
+.disk[data-tag='1'] {
+  background: var(--c-amber);
+}
+.disk[data-tag='2'] {
+  background: var(--c-sage);
+}
+.disk::before {
+  content: '';
+  position: absolute;
+  inset: 0 6px auto;
+  height: 16px;
+  background: var(--c-paper);
+  border-bottom: 3px solid var(--c-n0);
+}
+.disk::after {
+  content: '';
+  position: absolute;
+  inset: auto 9px 0;
+  height: 13px;
+  background: var(--c-paper);
+  border-left: 8px solid var(--c-shadow);
+}
+
+.note {
+  scroll-margin-top: calc(var(--bar) + 2rem);
+}
+.note[data-open] {
+  max-width: 44rem;
+  margin-inline: auto;
+}
+.note header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px dotted var(--c-ink);
+}
+.note header :global(.btn) {
+  margin-bottom: 1.5rem;
+}
+.note h2 {
+  margin-top: 0.4rem;
+  font-size: clamp(1.9rem, 1.4rem + 2.2vw, 2.75rem);
+}
+.note footer {
+  display: grid;
+  gap: 0.3rem;
+  max-width: 40rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 3px dotted var(--c-ink);
+}
+.note footer a {
+  font: 600 1.35rem/1.2 var(--font-display), sans-serif;
+}
+/* Before the page is live every note is listed under the index, one after another. */
+.front:not([hidden]) ~ .note {
+  margin-top: 4rem;
+}
+.note:not([hidden]) {
+  animation: insert 0.25s steps(5);
+}
+
+@keyframes insert {
+  from { opacity: 0; translate: 0 1.25rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .disk {
+    transition: translate 0.12s steps(3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .note:not([hidden]) {
+    animation: none;
+  }
+}
