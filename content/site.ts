@@ -17,6 +17,13 @@ export const site = {
   ],
 };
 
+// The About timeline, oldest first. An empty `when` or `text` shows as not written yet.
+export const timeline: { when: string; title: string; text: string }[] = [
+  { when: '', title: 'Meeting transcription and speaker attribution', text: '' }, // DRAFT: date and story to come
+  { when: '', title: 'A sales agent with retrieval', text: '' }, // DRAFT: date and story to come
+  { when: '2026', title: 'This room', text: 'Planned and art-directed this portfolio: a pixel room drawn at 480×270, with a tour, a radio that plays rain, and a cat.' },
+];
+
 export const sections = [
   { key: 'work', href: '/work', title: 'Work', object: 'the computer', file: 'WORK.EXE', loading: 'Booting WORK.EXE', sfx: 'crt' },
   { key: 'notes', href: '/notes', title: 'Notes', object: 'the floppy disks', file: 'A:\\NOTES', loading: 'Reading disk A:', sfx: 'floppy' },

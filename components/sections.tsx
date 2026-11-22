@@ -75,11 +75,6 @@ export function Prose({ blocks }: { blocks: Block[] }) {
 
 const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
 const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
-export function AboutBody() {
-  return <>{site.about.map(p => <p key={p}>{p}</p>)}</>;
-}
-
-
 export function ContactList() {
   const links = [
     site.email && { label: 'Email', href: `mailto:${site.email}`, text: site.email },

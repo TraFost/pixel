@@ -1,0 +1,136 @@
+.track {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 3px solid var(--c-ink);
+  scrollbar-width: none;
+}
+.track button {
+  flex: 1 0 6.5rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.75rem 0.5rem 0.9rem;
+  font: 600 1.25rem/1 var(--font-display), sans-serif;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.track i {
+  width: 18px;
+  height: 18px;
+  background: var(--c-paper);
+  border: 3px solid var(--c-ink);
+}
+.track button:hover {
+  color: var(--c-ink);
+}
+.track button:hover i {
+  translate: 0 -3px;
+}
+.track button[aria-selected='true'] {
+  color: var(--c-ink);
+  background: var(--c-cream);
+}
+.track button[aria-selected='true'] i {
+  background: var(--c-amber);
+}
+
+.memory {
+  padding: 1.5rem 1.25rem 1.6rem;
+  background: var(--c-cream);
+  border: 3px solid var(--c-ink);
+  border-top: 0;
+  box-shadow: 4px 4px 0 var(--rule);
+  animation: turn 0.2s steps(4);
+}
+.memory[data-blank] {
+  background: none;
+  border-style: dashed;
+  box-shadow: none;
+}
+.memory[data-blank] p:last-child {
+  color: var(--muted);
+}
+.when {
+  margin: 0;
+  font: 600 2.75rem/1 var(--font-display), sans-serif;
+  color: var(--accent);
+}
+.memory h3 {
+  margin: 0.4rem 0 0.6rem;
+  font: 600 1.4rem/1.2 var(--font-display), sans-serif;
+}
+.memory p:last-child {
+  max-width: 36rem;
+  margin: 0;
+}
+
+/* Prints pinned to the page with a strip of tape. Pixel art stays unrotated so it stays sharp. */
+.keepsakes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.75rem 1rem;
+  margin: 0;
+  padding: 0.75rem 0 0;
+  list-style: none;
+}
+.keepsakes li {
+  position: relative;
+  width: min-content;
+  padding: 0.6rem 0.6rem 0.75rem;
+  background: var(--c-paper);
+  border: 3px solid var(--c-ink);
+  box-shadow: 4px 4px 0 var(--rule);
+}
+.keepsakes li:nth-child(even) {
+  margin-top: 1.25rem;
+}
+.keepsakes li::before {
+  content: '';
+  position: absolute;
+  top: -0.75rem;
+  left: calc(50% - 1.5rem);
+  width: 3rem;
+  height: 1.1rem;
+  background: var(--c-cream);
+  border: 3px solid var(--c-ink);
+}
+.keepsakes li:hover {
+  translate: 0 -4px;
+  box-shadow: 4px 8px 0 var(--rule);
+}
+.keepsakes button {
+  display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.keepsakes button:active {
+  translate: 2px 2px;
+}
+.keepsakes p {
+  min-width: 6.5rem;
+  margin: 0.6rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+@keyframes turn {
+  from { opacity: 0; translate: 0.75rem 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .track i,
+  .keepsakes li {
+    transition: translate 0.12s steps(3), box-shadow 0.12s steps(3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .memory {
+    animation: none;
+  }
+}
