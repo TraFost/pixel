@@ -1,5 +1,3 @@
-import { Go } from '@/components/Travel';
-import { projects } from '@/content/projects';
 import { notes } from '@/content/notes';
 import { site } from '@/content/site';
 import type { CSSProperties, ReactNode } from 'react';
@@ -78,27 +76,6 @@ export function Prose({ blocks }: { blocks: Block[] }) {
 
 const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
 const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
-export function WorkList() {
-  return (
-    <ul className="files">
-      {projects.map((p, i) => (
-        <li key={p.slug}>
-          <Go href={`/work/${p.slug}`} label={`Opening ${p.slug}.txt`} sfx="page">
-            {icon(i)}
-            <span>
-              <strong>{p.title}</strong>
-              <span>{p.summary}</span>
-              <span className="meta">{p.draft ? 'outline only · ' : ''}{p.tags.join(' · ')}</span>
-            </span>
-            <b aria-hidden>▶</b>
-          </Go>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-
 export function NotesList() {
   return (
     <div className="files">
