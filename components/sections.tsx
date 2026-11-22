@@ -1,15 +1,18 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { Back, Go } from '@/components/Travel';
-import { notes } from '@/content/notes';
+import { Go } from '@/components/Travel';
 import { projects } from '@/content/projects';
-import { sections, site } from '@/content/site';
+import { notes } from '@/content/notes';
+import { site } from '@/content/site';
+import type { CSSProperties, ReactNode } from 'react';
+import { Figure } from '@/components/Figure';
+import { Back } from '@/components/Travel';
+import type { Block } from '@/content/blocks';
+import { sections } from '@/content/site';
 import room from '@/components/room/room.json';
 
 type Box = { x: number; y: number; w: number; h: number };
 type SectionKey = (typeof sections)[number]['key'];
 
-const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
-const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
+export const pad = (n: number) => String(n).padStart(2, '0');
 
 export function Sprite({ box, scale = 2 }: { box: Box; scale?: number }) {
   const style: CSSProperties = {
@@ -22,8 +25,9 @@ export function Sprite({ box, scale = 2 }: { box: Box; scale?: number }) {
   return <span aria-hidden className="sprite" style={style} />;
 }
 
-export function Screen({ section, file, eyebrow, title, lede, sprite, status, children }: {
-  section?: SectionKey; file?: string; eyebrow?: string; title: string; lede?: string; sprite?: ReactNode; status?: string; children: ReactNode;
+export function Screen({ section, file, eyebrow, title, lede, facts, sprite, status, children }: {
+  section?: SectionKey; file?: string; eyebrow?: string; title: string; lede?: string; facts?: [label: string, value: string][];
+  sprite?: ReactNode; status?: string; children: ReactNode;
 }) {
   const sec = sections.find(s => s.key === section);
   return (
@@ -40,8 +44,13 @@ export function Screen({ section, file, eyebrow, title, lede, sprite, status, ch
               <p className="label">{eyebrow ?? sec?.object}</p>
               <h1>{title}</h1>
               {lede && <p className="lede">{lede}</p>}
+              {facts && (
+                <dl className="facts">
+                  {facts.map(([label, value]) => <div key={label}><dt className="label">{label}</dt><dd>{value}</dd></div>)}
+                </dl>
+              )}
             </div>
-            {sprite ?? (sec && <Sprite box={room.hotspots[sec.key]} />)}
+            {sprite}
           </div>
           {children}
         </div>
@@ -54,6 +63,21 @@ export function Screen({ section, file, eyebrow, title, lede, sprite, status, ch
   );
 }
 
+export function Prose({ blocks }: { blocks: Block[] }) {
+  return blocks.map((block, i) => {
+    if (typeof block === 'string') return <p key={i}>{block}</p>;
+    if ('figure' in block) return <Figure key={i} name={block.figure} caption={block.caption} />;
+    return (
+      <figure key={i} className="code">
+        <pre tabIndex={0}><code>{block.code}</code></pre>
+        <figcaption>{block.caption}</figcaption>
+      </figure>
+    );
+  });
+}
+
+const ICONS = ['var(--c-amber)', 'var(--c-night)', 'var(--c-sage)'];
+const icon = (i: number) => <i aria-hidden className="ico" style={{ background: ICONS[i % ICONS.length] }} />;
 export function WorkList() {
   return (
     <ul className="files">
@@ -73,6 +97,7 @@ export function WorkList() {
     </ul>
   );
 }
+
 
 export function NotesList() {
   return (
@@ -95,9 +120,11 @@ export function NotesList() {
   );
 }
 
+
 export function AboutBody() {
   return <>{site.about.map(p => <p key={p}>{p}</p>)}</>;
 }
+
 
 export function ContactList() {
   const links = [
