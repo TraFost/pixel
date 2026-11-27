@@ -10,10 +10,8 @@
 //     the slice <name> (the cat purring)
 //   - slices "loop/<name>": regions that animate (every frame of the file is one step of the loop)
 //   - slices "crop/<name>": regions a page shows on its own
-//   - hidden layers "actor/<name>/<pose>": a character that moves about the room, one layer per pose,
-//     each exported on its own with no room behind it, from the slice "actor/<name>" (whose bottom edge
-//     is the ground under its feet). Slices "stop/<name>/<place>" are places it goes: the middle of the
-//     slice's bottom edge is where its feet land
+//   - hidden layers "actor/<name>/<pose>": a character that moves about the room, one strip per pose,
+//     cut from the slice "actor/<name>". Slices "stop/<name>/<place>" are the places it goes
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { blit, flatten, png, readAse } from './ase.mjs';
 

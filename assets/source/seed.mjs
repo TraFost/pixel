@@ -150,22 +150,17 @@ const CAT_KEY = {
 const CAT_AT = { x: 216, y: 165 };
 const CAT_BOX = { x: CAT_AT.x - 2, y: CAT_AT.y - 17, w: 28, h: 45 }; // the cat, plus headroom for the hearts
 
-// Rocky, from Project Hail Mary, after the film's design: a faceted boulder of sandstone carried on
-// five thick limbs, each an upper arm, an elbow knuckle and a forearm on a three-fingered hand. No face.
-// He is drawn by column (0..45, left to right) and row (0 = the ground under his feet).
-const ROCKY_AT = { x: 290, y: 242 }; // where he is drawn in the file: on the rug
-const ROCKY_BOX = { x: ROCKY_AT.x - 32, y: ROCKY_AT.y - 47, w: 64, h: 49 }; // room for a raised hand above, a fist to the right
-const stop = feet => ({ x: feet.x - 4, y: feet.y - 2, w: 8, h: 4 }); // his box lands with the middle of its bottom edge on a stop's
+const ROCKY_AT = { x: 290, y: 242 };
+const ROCKY_BOX = { x: ROCKY_AT.x - 32, y: ROCKY_AT.y - 47, w: 64, h: 49 };
+const stop = feet => ({ x: feet.x - 4, y: feet.y - 2, w: 8, h: 4 });
 const STOPS = { rug: ROCKY_AT, cat: { x: 276, y: 236 }, bed: { x: 112, y: 185 }, desk: { x: 266, y: 127 } };
 const STONE = { lit: C.tan, face: C.umber, dark: C.m2, seam: C.m1 };
 
-let shift = [0, 0]; // where the piece being drawn sits, off his standing place
-const at = (c, y, colour) => put(ROCKY_AT.x - 23 + c + shift[0], ROCKY_AT.y + y + shift[1], colour);
+let shift = [0, 0];
+const at = (c, y, colour) => put(ROCKY_AT.x - 23 + c + shift[0], ROCKY_AT.y + y + shift[1], colour); // column 0..45, row 0 = the ground under his feet
 const run = (c, y0, y1, colour) => { for (let y = y0; y <= y1; y++) at(c, y, colour); };
 const mark = (rows, c, y, colour) => rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '#') at(c + i, y + j, colour); }));
 
-// The boulder: a flat faceted top, widest at the shoulders, narrowing to a blunt chin. A ridge runs
-// down the front; the plane to its left catches the light, the one to its right is shaded and pitted.
 const SHELL = { '-30': [17, 23], '-29': [15, 27], '-28': [14, 30], '-27': [13, 31], '-26': [13, 32], '-25': [13, 32], '-24': [13, 32], '-23': [13, 32],
   '-22': [13, 32], '-21': [13, 32], '-20': [14, 32], '-19': [14, 31], '-18': [15, 31], '-17': [15, 30], '-16': [16, 29], '-15': [17, 28], '-14': [18, 26], '-13': [19, 24] };
 function shell() {
@@ -179,12 +174,11 @@ function shell() {
         : c > c1 - 3 || y >= -16 ? C.m2 : C.umber);
     }
   }
-  for (const [c, y] of [[16, -24], [17, -23], [18, -23], [18, -22], [19, -21]]) at(c, y, C.umber); // a crack
-  for (const [c, y] of [[27, -24], [29, -22], [26, -21], [28, -19], [25, -18]]) at(c, y, C.m1); // pits
-  at(17, -27, C.sage); at(18, -27, C.sL); at(28, -17, C.sD); at(29, -26, C.sage); // mineral
+  for (const [c, y] of [[16, -24], [17, -23], [18, -23], [18, -22], [19, -21]]) at(c, y, C.umber);
+  for (const [c, y] of [[27, -24], [29, -22], [26, -21], [28, -19], [25, -18]]) at(c, y, C.m1);
+  at(17, -27, C.sage); at(18, -27, C.sL); at(28, -17, C.sD); at(29, -26, C.sage);
 }
 
-// The upper arm and elbow of a near limb. They ride with the body.
 function shoulder(mirror, body) {
   const { lit, face, dark, seam } = STONE, m = c => (mirror ? 45 - c : c);
   shift = body;
@@ -199,7 +193,6 @@ function shoulder(mirror, body) {
   run(m(mirror ? 1 : 6), -19, -15, dark);
 }
 
-// The forearm and hand of a near limb: it hangs from the elbow, and a step lifts and carries it.
 function forearm(mirror, body, [lift, reach]) {
   const { lit, face, dark, seam } = STONE, m = c => (mirror ? 45 - c : c), top = -14 + body[1], low = -4 - lift;
   shift = [body[0] + reach, 0];
@@ -211,7 +204,6 @@ function forearm(mirror, body, [lift, reach]) {
   at(m(mirror ? 7 : 0), low + 1, lit); run(m(mirror ? 0 : 7), low + 1, low + 3, dark);
 }
 
-// A limb behind, seen through an arch: a forearm leaning outwards as it comes down.
 function far(mirror, body, [lift, reach]) {
   const m = c => (mirror ? 45 - c : c), top = -17 + body[1], low = -5 - lift;
   shift = [body[0] + reach, 0];
@@ -223,7 +215,6 @@ function far(mirror, body, [lift, reach]) {
   at(m(11), top + 2, C.sD);
 }
 
-// The fifth limb, under his chin.
 function back(body, [lift]) {
   shift = [body[0], 0];
   for (let c = 24; c <= 26; c++) run(c, -13 + body[1], -4 - lift, C.m1);
@@ -231,8 +222,6 @@ function back(body, [lift]) {
   for (let c = 23; c <= 27; c++) at(c, -3 - lift, C.m1);
 }
 
-// A near arm thrown up: upper arm rising from the shoulder, forearm standing on the elbow. `swing`
-// carries the forearm sideways (a wave); `press` brings the hand down (working at something above him).
 function raised(left, body, swing, press = 0) {
   const { lit, face, dark, seam } = STONE, m = c => (left ? 45 - c : c), [near, off] = left ? [43, 38] : [38, 43];
   shift = body;
@@ -252,8 +241,6 @@ function raised(left, body, swing, press = 0) {
   at(m(left ? 44 : 37), -43, lit); run(m(left ? 37 : 44), -43, -41, dark);
 }
 
-// The near right arm driven straight out, ending in a fist seen from the side: a rounded block bigger
-// than the arm behind it, with the three fingers stacked on the face that does the bumping.
 function punch(body) {
   const { lit, face, dark, seam } = STONE;
   shift = body;
@@ -266,9 +253,6 @@ function punch(body) {
   for (const y of [-24, -21]) for (let c = 45; c < 48; c++) at(c, y, seam);
 }
 
-// Down on the bed: the shell set on its chin, the near arms folded round the front with the hands
-// tucked together under it, the far knuckles showing behind the shoulders. `up` lifts the shell off
-// its chin onto the elbows, `lean` turns it: that is him awake, keeping guard.
 function lying(breath, up = 0, lean = 0) {
   const { lit, face, dark, seam } = STONE;
   for (const mirror of [false, true]) {
@@ -297,17 +281,13 @@ function lying(breath, up = 0, lean = 0) {
   }
 }
 
-// Each pose, and the frame of the twelve that a given frame repeats: the length of its cycle.
 const POSES = {
   run: f => f % 6, wave: f => f % 4, sleep: f => (f < 6 ? 0 : 6), watch: f => (f < 6 ? 0 : 6),
   talk: f => f % 4, offer: f => (f < 6 ? 0 : 6), bump: f => f % 2, notice: () => 0, tinker: f => f % 4,
 };
 
-// One frame of a pose. Tag 2 marks his shadow and tag 1 the rest, so the shadow can be made
-// see-through and the rest outlined afterwards. Walking is six frames: two sets of limbs step in
-// turn, and the body rises as a set lifts, then sinks and leans as it lands.
 function rocky(pose, f) {
-  cur = 2;
+  cur = 2; // 2 tags his shadow, 1 the rest of him
   shift = [0, 0];
   for (let c = 4; c <= 41; c++) { at(c, 0, C.n0); if (c > 6 && c < 39) at(c, 1, C.n0); }
   cur = 1;
@@ -321,18 +301,18 @@ function rocky(pose, f) {
     far(false, body, stride(1)); far(true, body, stride(0)); back(body, stride(0));
     shift = body;
     shell();
-    if (pose === 'tinker') { // both near arms up at whatever he is working on, pressing in turn
+    if (pose === 'tinker') {
       raised(true, body, 0, beat ? 0 : 3); raised(false, body, 0, beat ? 3 : 0);
       shift = [0, 0];
-      if (f % 2) for (const [c, y] of beat ? [[36, -43], [34, -45], [38, -46]] : [[9, -43], [11, -45], [7, -46]]) at(c, y, C.amber); // sparks
+      if (f % 2) for (const [c, y] of beat ? [[36, -43], [34, -45], [38, -46]] : [[9, -43], [11, -45], [7, -46]]) at(c, y, C.amber);
     } else {
       shoulder(false, body); forearm(false, body, stride(0));
       if (pose === 'wave') raised(false, body, [-2, 0, 2, 0][f % 4]);
       else if (pose === 'offer' || pose === 'bump') punch(body);
       else { shoulder(true, body); forearm(true, body, stride(1)); }
       shift = [0, 0];
-      if (pose === 'bump' && f % 2 === 0) for (const [c, y] of [[51, -30], [52, -29], [53, -23], [54, -23], [51, -16], [52, -17]]) at(c, y, C.g3); // the bump lands
-      if (pose === 'talk') { mark(NOTE, 29, -38 - (f % 4), C.g3); mark(NOTE, 35, -35 - ((f + 2) % 4), C.sL); } // he speaks in chords
+      if (pose === 'bump' && f % 2 === 0) for (const [c, y] of [[51, -30], [52, -29], [53, -23], [54, -23], [51, -16], [52, -17]]) at(c, y, C.g3);
+      if (pose === 'talk') { mark(NOTE, 29, -38 - (f % 4), C.g3); mark(NOTE, 35, -35 - ((f + 2) % 4), C.sL); }
       if (pose === 'notice') mark(['#', '#', '#', '.', '#'], 23, -38, C.amber);
     }
   }
@@ -751,7 +731,7 @@ for (const [pose, repeats] of Object.entries(POSES)) {
     reset();
     rocky(pose, f);
     const edge = i => [i - 1, i + 1, i - W, i + W].some(k => tag[k] === 1);
-    const img = render(i => tag[i] === 1 ? colourAt(i) : tag[i + W] === 1 ? C.m1 : edge(i) ? C.w0 : null); // outline: brown along the top, near-black elsewhere
+    const img = render(i => tag[i] === 1 ? colourAt(i) : tag[i + W] === 1 ? C.m1 : edge(i) ? C.w0 : null);
     for (let i = 0; i < W * H; i++) if (tag[i] === 2 && !img[i * 4 + 3]) img.set([...rgb[C.n0], 96], i * 4);
     fr.cels.push({ ...cel(0, img), layer });
   });

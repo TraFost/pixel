@@ -11,7 +11,7 @@ import s from './PixelRoom.module.css';
 type Box = { x: number; y: number; w: number; h: number };
 
 let toured = false;
-let inBed = false; // Rocky walks in once per page load; after that he is found in bed
+let inBed = false;
 
 const WALK = 40; // art pixels a second
 const POSES = ['run', 'wave', 'sleep', 'watch', 'talk', 'offer', 'bump', 'notice', 'tinker'] as const;
@@ -202,7 +202,7 @@ function Rocky({ onMeetCat }: { onMeetCat: () => void }) {
   const [pose, setPose] = useState<Pose>('run');
   const [line, setLine] = useState('');
   const walk = useRef<Animation[]>([]);
-  const me = useRef<{ busy: boolean; held: boolean; pose: Pose; bump?: () => void }>({ busy: false, held: false, pose: 'run' }); // `pose` is what his routine has him doing, under any talk
+  const me = useRef<{ busy: boolean; held: boolean; pose: Pose; bump?: () => void }>({ busy: false, held: false, pose: 'run' });
   const rocky = room.actors.rocky;
 
   useEffect(() => {
@@ -215,7 +215,7 @@ function Rocky({ onMeetCat }: { onMeetCat: () => void }) {
     };
     const pause = async (ms: number) => {
       await wait(ms);
-      while (self.busy) await wait(100); // his routine waits out a talk
+      while (self.busy) await wait(100);
       if (!alive) throw new Error('left the room');
     };
     const act = (as: Pose) => {
@@ -232,7 +232,6 @@ function Rocky({ onMeetCat }: { onMeetCat: () => void }) {
       walk.current.forEach(a => a.cancel());
       walk.current = [];
     };
-    // A hop up overshoots and comes down onto its mark; a hop down gathers itself first.
     const hop = (to: Point) => go(to, 450 + Math.abs(to.y - at.y) * 3, to.y < at.y ? 'cubic-bezier(0.3, 1.5, 0.6, 1)' : 'cubic-bezier(0.4, -0.5, 0.7, 0)');
     const settle = async () => {
       act('watch');
