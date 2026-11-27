@@ -10,6 +10,10 @@
 //     the slice <name> (the cat purring)
 //   - slices "loop/<name>": regions that animate (every frame of the file is one step of the loop)
 //   - slices "crop/<name>": regions a page shows on its own
+//   - hidden layers "actor/<name>/<pose>": a character that moves about the room, one layer per pose,
+//     each exported on its own with no room behind it, from the slice "actor/<name>" (whose bottom edge
+//     is the ground under its feet). Slices "stop/<name>/<place>" are places it goes: the middle of the
+//     slice's bottom edge is where its feet land
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { blit, flatten, png, readAse } from './ase.mjs';
 
@@ -40,6 +44,7 @@ out('wall.png', 1, top, wall);
 
 const hotspots = {}, crops = {}, loops = [];
 for (const [name, box] of Object.entries(slices)) {
+  if (name.startsWith('actor/') || name.startsWith('stop/')) continue;
   if (name.startsWith('crop/')) crops[name.slice(5)] = box;
   else if (name.startsWith('loop/')) {
     const strip = Buffer.alloc(box.w * frames.length * box.h * 4);
@@ -58,6 +63,19 @@ for (const alt of ase.layers.filter(l => l.name.startsWith('alt/'))) {
   out(`${name}-alt.png`, box.w * frames.length, box.h, strip);
 }
 
+const actors = {};
+for (const [slice, box] of Object.entries(slices)) {
+  if (!slice.startsWith('actor/')) continue;
+  const name = slice.slice(6), poses = ase.layers.filter(l => l.name.startsWith(`${slice}/`)), stops = {};
+  for (const layer of poses) {
+    const strip = Buffer.alloc(box.w * frames.length * box.h * 4);
+    frames.forEach((_, f) => blit(flatten(ase, f, l => l === layer), W, box, strip, box.w * frames.length, box.w * f));
+    out(`${name}-${layer.name.slice(slice.length + 1)}.png`, box.w * frames.length, box.h, strip);
+  }
+  for (const [key, at] of Object.entries(slices)) if (key.startsWith(`stop/${name}/`)) stops[key.split('/')[2]] = { x: at.x + at.w / 2, y: at.y + at.h };
+  actors[name] = { w: box.w, h: box.h, stops };
+}
+
 const og = Buffer.alloc(1200 * 630 * 4);
 for (let i = 0; i < 1200 * 630; i++) og.set([0x24, 0x2a, 0x38, 255], i * 4);
 blit(shots[0], W, { x: 0, y: 0, w: W, h: H }, og, 1200, 120, 45, 2);
@@ -65,7 +83,7 @@ out('og.png', 1200, 630, og);
 
 writeFileSync('components/room/room.json', JSON.stringify({
   w: W, h: H, frames: frames.length, ms: frames.reduce((sum, f) => sum + f.ms, 0),
-  floor: { y: top, h: bottom - top }, wall: '#' + shots[0].subarray((W - 1) * 4, (W - 1) * 4 + 3).toString('hex'), hotspots, loops, crops,
+  floor: { y: top, h: bottom - top }, wall: '#' + shots[0].subarray((W - 1) * 4, (W - 1) * 4 + 3).toString('hex'), hotspots, loops, actors, crops,
 }, null, 2) + '\n');
 
 if (process.env.ZOOM) {
