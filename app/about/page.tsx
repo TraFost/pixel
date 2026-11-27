@@ -29,10 +29,11 @@ export default function About() {
         <section className="chapter">
           <h2><span className="num" aria-hidden>04</span>Colophon</h2>
           <ul className="squares prose">
-            <li>The room is a 480×270 Aseprite file in 27 colours. The case study “This room”, on the computer, explains how it works.</li>
+            <li>The room is a 480×270 Aseprite file in 29 colours. The case study “This room”, on the computer, explains how it works.</li>
             <li>Type is IBM Plex Sans for reading, Pixelify Sans for headings and Silkscreen for small labels. All are under the SIL Open Font License and served from this site.</li>
             <li>Sound is synthesised in the browser. The radio on the shelf switches it off, and so does the M key.</li>
             <li>The print above the lamp is Guts, from Kentaro Miura’s <cite>Berserk</cite>. Fan art, drawn for this room.</li>
+            <li>The rock on five legs who walks in, waves and keeps guard on the bed is Rocky, from Andy Weir’s <cite>Project Hail Mary</cite>. Fan art too.</li>
           </ul>
         </section>
       </Reader>

@@ -84,11 +84,60 @@ left: round(down, calc((100% - var(--rw)) / 2), 1px);
   background-size: calc(var(--n) * 100%) 100%;
   animation: strip steps(var(--n)) infinite;
 }
-.spot .loop {
+.spot .loop,
+.actor .loop {
   inset: 0;
 }
 @keyframes strip {
   to { background-position-x: calc(var(--n) / (var(--n) - 1) * 100%); }
+}
+
+/* An actor stands with the middle of its bottom edge at (--at-x, --at-y), in art pixels, rounded so
+   it never lands between two. Until the page places it, it waits far off to the right. */
+@property --at-x {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 9999;
+}
+@property --at-y {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+.actor {
+  display: none;
+  pointer-events: none;
+}
+@supports (width: round(down, 100px, 10px)) {
+  .actor {
+    --u: calc(var(--px) * var(--rh));
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: calc(var(--w) * var(--u));
+    height: calc(var(--h) * var(--u));
+    translate:
+      round(calc((var(--at-x) - var(--w) / 2) * var(--u)), var(--u))
+      round(calc((var(--at-y) - var(--h)) * var(--u)), var(--u));
+  }
+}
+/* The part of his box you can touch: his body, not the empty room kept above it for a raised hand. */
+.actor button {
+  position: absolute;
+  bottom: 0;
+  left: 14%;
+  width: 72%;
+  height: 55%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.actor button:focus-visible {
+  outline: 2px solid var(--c-amber);
+  outline-offset: 2px;
 }
 
 .spot {
@@ -129,6 +178,13 @@ left: round(down, calc((100% - var(--rw)) / 2), 1px);
   box-shadow: 2px 2px 0 var(--c-n0);
   opacity: 0;
   pointer-events: none;
+}
+/* What an actor says: the same label, standing over its head. */
+.say {
+  composes: tip;
+  top: auto;
+  bottom: 70%;
+  opacity: 1;
 }
 .spot:is(:hover, :focus-visible, [data-lit]) :is(.hi, .tip) {
   opacity: 1;

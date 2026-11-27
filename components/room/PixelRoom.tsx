@@ -11,11 +11,19 @@ import s from './PixelRoom.module.css';
 type Box = { x: number; y: number; w: number; h: number };
 
 let toured = false;
+let inBed = false; // Rocky walks in once per page load; after that he is found in bed
+
+const WALK = 40; // art pixels a second
+const POSES = ['run', 'wave', 'sleep', 'watch', 'talk', 'offer', 'bump', 'notice', 'tinker'] as const;
+type Pose = (typeof POSES)[number];
+type Point = { x: number; y: number };
+const wait = (ms: number) => new Promise<void>(done => setTimeout(done, ms));
 
 const pct = (n: number, of: number) => `${(n / of) * 100}%`;
 const place = (b: Box): CSSProperties => ({
   left: pct(b.x, room.w), top: pct(b.y, room.h), width: pct(b.w, room.w), height: pct(b.h, room.h),
 });
+const strip = (file: string) => ({ backgroundImage: `url(/art/${file}.png)`, animationDuration: `${room.ms}ms`, '--n': room.frames }) as CSSProperties;
 const outline = (b: Box): CSSProperties => ({
   backgroundSize: `${pct(room.w, b.w)} ${pct(room.h, b.h)}`,
   backgroundPosition: `${pct(b.x, room.w - b.w)} ${pct(b.y, room.h - b.h)}`,
@@ -80,16 +88,17 @@ export function PixelRoom() {
               height={room.h}
               unoptimized
               priority
-              alt="A pixel-art room on a rainy night. Someone asleep in the bed under the window, a desk with a glowing CRT computer, floppy disks, a notebook and a telephone, an orange cat sitting on the chair, a print of Guts from Berserk above the lamp, and a bookshelf with a radio on top."
+              alt="A pixel-art room on a rainy night. Someone asleep in the bed under the window, a desk with a glowing CRT computer, floppy disks, a notebook and a telephone, an orange cat sitting on the chair, a print of Guts from Berserk above the lamp, a bookshelf with a radio on top, and Rocky from Project Hail Mary, who walks in, waves, and keeps guard on the bed."
             />
             {room.loops.filter(a => sound || a.name !== 'notes').map(a => (
               <span
                 key={a.name}
                 aria-hidden
                 className={s.loop}
-                style={{ ...place(a), backgroundImage: `url(/art/${a.name}.png)`, animationDuration: `${room.ms}ms`, '--n': room.frames } as CSSProperties}
+                style={{ ...place(a), ...strip(a.name) }}
               />
             ))}
+            <Rocky onMeetCat={() => { play('meow'); setPurring(true); }} />
             {sections.map(spot => {
               const b = room.hotspots[spot.key];
               return (
@@ -121,7 +130,7 @@ export function PixelRoom() {
               onClick={() => { play('purr'); setPurring(true); }}
             >
               <span aria-hidden className={s.hi} style={outline(room.hotspots.cat)} />
-              {purring && <span aria-hidden className={s.loop} style={{ backgroundImage: 'url(/art/cat-alt.png)', animationDuration: `${room.ms}ms`, '--n': room.frames } as CSSProperties} />}
+              {purring && <span aria-hidden className={s.loop} style={strip('cat-alt')} />}
             </button>
           </div>
         </div>
@@ -185,5 +194,142 @@ function Tour({ lines, step, onNext, onSkip }: { lines: typeof tour; step: numbe
         </button>
       </footer>
     </section>
+  );
+}
+
+function Rocky({ onMeetCat }: { onMeetCat: () => void }) {
+  const el = useRef<HTMLSpanElement>(null);
+  const [pose, setPose] = useState<Pose>('run');
+  const [line, setLine] = useState('');
+  const walk = useRef<Animation[]>([]);
+  const me = useRef<{ busy: boolean; held: boolean; pose: Pose; bump?: () => void }>({ busy: false, held: false, pose: 'run' }); // `pose` is what his routine has him doing, under any talk
+  const rocky = room.actors.rocky;
+
+  useEffect(() => {
+    const node = el.current!, { rug, cat, bed, desk } = rocky.stops, floor = rug.y, self = me.current;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let at = bed, alive = true;
+    const put = (to: Point) => {
+      node.style.setProperty('--at-x', String(to.x));
+      node.style.setProperty('--at-y', String(to.y));
+    };
+    const pause = async (ms: number) => {
+      await wait(ms);
+      while (self.busy) await wait(100); // his routine waits out a talk
+      if (!alive) throw new Error('left the room');
+    };
+    const act = (as: Pose) => {
+      self.pose = as;
+      if (!self.busy) setPose(as);
+    };
+    const go = async (to: Point, ms = (Math.hypot(to.x - at.x, to.y - at.y) / WALK) * 1000, rise = 'linear') => {
+      walk.current = [
+        node.animate({ '--at-x': [at.x, to.x] }, { duration: ms, fill: 'forwards' }),
+        node.animate({ '--at-y': [at.y, to.y] }, { duration: ms, fill: 'forwards', easing: rise }),
+      ];
+      await Promise.all(walk.current.map(a => a.finished));
+      put(at = to);
+      walk.current.forEach(a => a.cancel());
+      walk.current = [];
+    };
+    // A hop up overshoots and comes down onto its mark; a hop down gathers itself first.
+    const hop = (to: Point) => go(to, 450 + Math.abs(to.y - at.y) * 3, to.y < at.y ? 'cubic-bezier(0.3, 1.5, 0.6, 1)' : 'cubic-bezier(0.4, -0.5, 0.7, 0)');
+    const settle = async () => {
+      act('watch');
+      await pause(7000);
+      act('sleep');
+    };
+    const rounds = async () => {
+      for (;;) {
+        await pause(40000);
+        act('run');
+        await hop({ x: bed.x + 18, y: floor });
+        await go({ x: desk.x, y: floor });
+        await hop(desk);
+        act('tinker');
+        await pause(9000);
+        act('run');
+        await hop({ x: desk.x, y: floor });
+        await go({ x: bed.x + 18, y: floor });
+        await hop(bed);
+        await settle();
+      }
+    };
+    const arrive = async () => {
+      const art = node.parentElement!.getBoundingClientRect(), scene = node.parentElement!.parentElement!.getBoundingClientRect();
+      put(at = { x: ((scene.right - art.left) / art.height) * room.h + rocky.w, y: floor }); // just past the right-hand edge of the screen
+      await go(rug);
+      act('wave');
+      await pause(3600);
+      act('run');
+      await go(cat);
+      act('notice');
+      onMeetCat();
+      await pause(1800);
+      act('run');
+      await go({ x: bed.x + 18, y: floor });
+      await hop(bed);
+      inBed = true;
+      await settle();
+    };
+
+    if (inBed || still) {
+      put(bed);
+      act('sleep');
+    }
+    (still ? Promise.resolve() : inBed ? rounds() : arrive().then(rounds)).catch(() => {}); // leaving the room rejects whatever he was waiting on
+    return () => {
+      alive = false;
+      walk.current.forEach(a => a.cancel());
+    };
+  }, []);
+
+  const hold = (held: boolean) => {
+    me.current.held = held;
+    if (me.current.busy || !walk.current.length) return;
+    walk.current.forEach(a => (held ? a.pause() : a.play()));
+    setPose(held ? 'wave' : 'run');
+  };
+
+  const wake = async () => {
+    const self = me.current;
+    if (self.bump) return self.bump();
+    if (self.busy) return;
+    self.busy = true;
+    walk.current.forEach(a => a.pause());
+    setPose('talk');
+    setLine('Amaze!');
+    play('chord');
+    await wait(1800);
+    setPose('offer');
+    setLine('Fist my bump');
+    const bumped = await new Promise<boolean>(done => {
+      self.bump = () => done(true);
+      setTimeout(() => done(false), 8000);
+    });
+    self.bump = undefined;
+    setLine('');
+    if (bumped) {
+      setPose('bump');
+      play('bump');
+      await wait(900);
+    }
+    self.busy = false;
+    setPose(self.pose);
+    hold(self.held);
+  };
+
+  return (
+    <span ref={el} className={s.actor} style={{ '--w': rocky.w, '--h': rocky.h } as CSSProperties}>
+      {POSES.map(p => <span key={p} aria-hidden className={s.loop} style={{ ...strip(`rocky-${p}`), visibility: p === pose ? 'visible' : 'hidden' }} />)}
+      {line && <span className={s.say} role="status">{line}</span>}
+      <button
+        type="button"
+        aria-label={pose === 'offer' ? 'Bump Rocky’s fist' : 'Say hello to Rocky'}
+        onPointerEnter={e => { if (e.pointerType === 'mouse') hold(true); }}
+        onPointerLeave={() => hold(false)}
+        onClick={wake}
+      />
+    </span>
   );
 }

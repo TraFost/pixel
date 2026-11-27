@@ -36,7 +36,7 @@ export const projects: Project[] = [
     title: 'This room',
     summary: 'A portfolio that is one 480×270 pixel room, filling the screen, with every sound synthesised.',
     tags: ['personal', 'Next.js', 'pixel art', 'Web Audio'],
-    facts: [['Year', '2026'], ['Part', 'Planning, art direction'], ['Stack', 'Next.js, React, Web Audio'], ['Art', '480×270, 27 colours']],
+    facts: [['Year', '2026'], ['Part', 'Planning, art direction'], ['Stack', 'Next.js, React, Web Audio'], ['Art', '480×270, 29 colours']],
     glance: [
       'The whole site is one 480×270 Aseprite file, shown only at whole-pixel scales.',
       'Click targets and animated regions are stored in the art file, so they cannot drift from the drawing.',
@@ -59,7 +59,7 @@ export const projects: Project[] = [
       {
         heading: 'Where the art lives',
         body: [
-          'The room is one Aseprite file: 480×270, seventeen layers, a twelve-frame loop and a palette of 27 colours. Named slices mark the click targets and the regions that animate. The build reads that file directly and writes the images the page uses, so Aseprite is only needed for drawing.',
+          'The room is one Aseprite file: 480×270, seventeen layers, a twelve-frame loop and a palette of 29 colours. Named slices mark the click targets and the regions that animate. The build reads that file directly and writes the images the page uses, so Aseprite is only needed for drawing.',
           'The first version of every layer was typed, not drawn. A script stored a material and a brightness for each pixel, let three light sources (lamp, monitor, window) raise the brightness, and picked colours from each material’s ramp with a narrow dither. That gave consistent lighting to start from. The file is laid out so that each layer can be redrawn by hand, one at a time, without touching code.',
           { figure: 'pipeline', caption: 'From the drawing to the page. Press a step.' },
         ],
@@ -87,13 +87,13 @@ export const projects: Project[] = [
           'The print above the lamp uses fixed colours. At 42×32 pixels the room’s light map dithered it into mud, so it is the one object the lamp does not light.',
           'There is no navigation bar. Every page has one way out, back to the room, so moving between sections costs an extra click. In return nothing sits on top of the room.',
           'Sound is on by default, which browsers only permit after a first click or key press. The radio on the shelf switches it off, and so does the M key.',
-          'Animation is six small sprite strips (rain, steam, a text cursor, the sleeper’s z’s, notes from the radio, the cat’s tail) cut from the twelve frames and stepped by CSS, plus one more for the cat when it is petted. They stop when the system asks for reduced motion.',
+          'Animation is six small sprite strips (rain, steam, a text cursor, the sleeper’s z’s, notes from the radio, the cat’s tail) cut from the twelve frames and stepped by CSS, plus one more for the cat when it is petted. Rocky has nine strips of his own, one per pose. A script walks him in from off-screen, has him wave, meet the cat and settle on the bed, and now and then sends him to the desk to tinker; every step lands on a whole art pixel. Click him and he stops to say “Amaze!” and holds out a fist to bump. They all stop when the system asks for reduced motion.',
         ],
       },
       {
         heading: 'Credits',
         body: [
-          'Planned and art-directed by Rahman. Built in a pairing session with an AI coding agent. The print is fan art of Guts, from Kentaro Miura’s Berserk.',
+          'Planned and art-directed by Rahman. Built in a pairing session with an AI coding agent. The print is fan art of Guts, from Kentaro Miura’s Berserk, and the visitor on five legs is fan art of Rocky, from Andy Weir’s Project Hail Mary.',
         ],
       },
     ],
