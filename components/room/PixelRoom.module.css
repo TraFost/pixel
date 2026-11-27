@@ -112,6 +112,7 @@ left: round(down, calc((100% - var(--rw)) / 2), 1px);
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1; /* over the hover picture of whatever he stands on */
     display: block;
     width: calc(var(--w) * var(--u));
     height: calc(var(--h) * var(--u));

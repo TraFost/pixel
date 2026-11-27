@@ -73,6 +73,8 @@ Rahman chose these. Do not reopen them.
 - Hover Rocky while he walks and he stops to wave. Click him at any time, mid-walk included, and he
   stops, says "Amaze!" (a chord), then holds out a fist under a "Fist my bump" label; click again within
   8 seconds to bump it. Either way he then carries on with what he was doing.
+- Rocky is drawn over the hover pictures, so hovering an object he stands on never hides him, and a
+  click on his body goes to him. Labels still show over him.
 
 **The tour**
 - A game-style dialogue box that walks through the objects, one line at a time. The lines are in
