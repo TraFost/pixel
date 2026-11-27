@@ -106,7 +106,7 @@ function Contrast() {
 
 const SOUNDS: [Sfx, string][] = [
   ['click', 'Click'], ['floppy', 'Floppy'], ['crt', 'Monitor'], ['dial', 'Telephone'],
-  ['page', 'Notebook'], ['blip', 'Dialogue'], ['meow', 'Meow'], ['purr', 'Purr'],
+  ['page', 'Notebook'], ['blip', 'Dialogue'], ['meow', 'Meow'], ['purr', 'Purr'], ['chord', 'Rocky'], ['bump', 'Fist bump'],
 ];
 
 function Sounds() {
@@ -125,7 +125,7 @@ function Sounds() {
         {SOUNDS.map(([name, label]) => <button key={name} type="button" className="btn" onClick={() => play(name)}>{label}</button>)}
       </div>
       <p className={s.readout} aria-live="polite">
-        {on ? 'Eight effects. The rain behind them is the ninth.' : 'Sound is switched off. Press M to turn it back on.'}
+        {on ? 'Ten effects. The rain behind them is the eleventh.' : 'Sound is switched off. Press M to turn it back on.'}
       </p>
     </>
   );

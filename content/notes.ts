@@ -40,13 +40,14 @@ export const notes: Note[] = [
   {
     slug: 'no-audio-files',
     tag: 'Audio',
-    title: 'Nine sounds, no audio files',
+    title: 'Eleven sounds, no audio files',
     date: '2026-11-21',
     summary: 'Every sound on this site is synthesised when it plays.',
     body: [
       'The click is 40 milliseconds of white noise through a band-pass filter at 2.4 kHz. The floppy is two of those plus a 110 Hz thump. The monitor is a 60 Hz thud, a short hiss and a faint high whine that fades over half a second. The telephone dials three touch-tone digits, each a low and a high sine wave together. The notebook is a puff of high-passed noise, and the dialogue box ticks with a 30 millisecond tone.',
       { figure: 'sounds', caption: 'Every effect on the site. Nothing is downloaded when you press one.' },
       'The cat has two. Its meow is a sawtooth that slides from 520 Hz up to 820 and back down, pushed through a band-pass filter that opens and closes like a mouth. Its purr is low rumble chopped 25 times a second.',
+      'Rocky has two as well. He speaks in a chord, three sine notes sliding up together, and his fist bump is a low thud under a click.',
       { code: `osc.type = 'sawtooth';
 osc.frequency.setValueAtTime(520, t);
 osc.frequency.linearRampToValueAtTime(820, t + 0.12);

@@ -1,4 +1,4 @@
-export type Sfx = 'click' | 'floppy' | 'crt' | 'dial' | 'page' | 'blip' | 'meow' | 'purr';
+export type Sfx = 'click' | 'floppy' | 'crt' | 'dial' | 'page' | 'blip' | 'meow' | 'purr' | 'chord' | 'bump';
 
 const KEY = 'rahman:sound';
 export const SOUND_EVENT = 'rahman:sound';
@@ -96,6 +96,9 @@ const FX: Record<Sfx, (a: AudioContext, t: number) => void> = {
     src.start(t); chop.start(t);
     src.stop(t + PURR_SECONDS); chop.stop(t + PURR_SECONDS);
   },
+  // Rocky's voice: three notes at once, each sliding a little, as a chord.
+  chord: (a, t) => [392, 494, 587].forEach((hz, i) => tone(a, t + i * 0.03, hz, hz * 1.06, 0.7, 0.07)),
+  bump: (a, t) => { tone(a, t, 140, 60, 0.14, 0.3); burst(a, t, 1200, 0.05, 0.2); },
 };
 
 export const PURR_SECONDS = 3.6;
