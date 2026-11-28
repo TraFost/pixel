@@ -110,9 +110,9 @@ function rain(a: AudioContext) {
   band.frequency.value = 1800;
   band.Q.value = 0.4;
   out.gain.value = 0;
-  out.gain.linearRampToValueAtTime(0.045, a.currentTime + 1.5);
+  out.gain.linearRampToValueAtTime(0.012, a.currentTime + 1.5);
   lfo.frequency.value = 0.13;
-  depth.gain.value = 0.012;
+  depth.gain.value = 0.0035;
   lfo.connect(depth).connect(out.gain);
   src.connect(band).connect(out).connect(a.destination);
   src.start();
